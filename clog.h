@@ -16,6 +16,19 @@ struct Content {
 	}
 };
 
+void outimpl(const Content&)
+{
+}
+
+typedef void (*Out)(const Content&);
+Out out(outimpl);
+
+void outlog(const char* m, void (*f)())
+{
+	f();
+	out(Content(m));
+}
+
 } // nclog
 } // unnamed
 
