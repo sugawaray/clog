@@ -1,6 +1,8 @@
 #include "clog.h"
 #include "nomagic.h"
 
+#define L	(loc(__FILE__, __LINE__))
+
 namespace nspy {
 
 using nclog::Content;
@@ -30,7 +32,7 @@ using nomagic::Test;
 void t1(const char* ms)
 {
 	Test t(ms);
-	t.a(Spy::last() == 0, loc(__FILE__, __LINE__));
+	t.a(Spy::last() == 0, L);
 }
 
 void t2(const char* ms)
@@ -40,8 +42,8 @@ void t2(const char* ms)
 	Content c(m);
 	Spy::out(c);
 	Content* r(Spy::last());
-	t.a(r != 0, loc(__FILE__, __LINE__));
-	t.a(r->message == m, loc(__FILE__, __LINE__));
+	t.a(r != 0, L);
+	t.a(r->message == m, L);
 }
 
 } // nspy
