@@ -1,0 +1,25 @@
+* About this library
+
+	This is a simple logging library although I have not written any parts
+	of it yet.
+
+	Intended readers of the log are developers.
+
+	* This library is under construction.
+
+* Motivation
+
+	I want to write a logging library which is easy enough to write
+	logging code.
+
+	It is often difficult for me to write logging code.
+	
+	I often think I will add logging code later after implementing
+	necessary features. But then after testing is done, I often think
+	I do not want to add logging code because testing have already
+	been done.
+
+	I think this is not good habit.
+
+	I am not sure whether I can create it or not. But I hit upon an idea,
+	so I try it.
