@@ -8,7 +8,7 @@ namespace {
 using nomagic::loc;
 using nomagic::Test;
 
-using nclog::Content;
+using clog::Content;
 
 class Spy {
 public:
@@ -77,7 +77,7 @@ namespace nlog {
 class F {
 public:
 	F() {
-		nclog::out = Spy::out;
+		clog::outfn = Spy::out;
 	}
 };
 
@@ -93,9 +93,111 @@ void t1(const char* ms)
 	F f;
 	const char* m("message");
 	f1_called = false;
-	nclog::outlog(m, f1);
+	clog::out(m, f1);
 	t.a(Spy::last()->message == m, L);
 	t.a(f1_called, L);
+}
+
+namespace nf2 {
+
+bool called(false);
+int arg(-1);
+
+void reset()
+{
+	called = false;
+	arg = -1;
+}
+
+} // nf2
+
+void f2(int a)
+{
+	nf2::called = true;
+	nf2::arg = a;
+}
+
+void t2(const char* ms)
+{
+	Test t(ms);
+	F f;
+	const char* m("message");
+	nf2::reset();
+	clog::out(m, f2, 1);
+	t.a(Spy::last()->message == m, L);
+	t.a(nf2::called, L);
+	t.a(nf2::arg == 1, L);
+}
+
+namespace nf3 {
+
+bool called;
+
+class A {
+public:
+	A() : v(0) {
+	}
+
+	A(const A& op)
+		:	v(op.v) {
+		copied = true;
+	}
+
+	int v;
+	static bool copied;
+};
+bool A::copied;
+
+A a;
+A arg;
+
+void reset()
+{
+	called = false;
+	a = A();
+	a.v = 1;
+	arg = A();
+	A::copied = false;
+}
+
+} // nf3
+
+void f3(nf3::A& a)
+{
+	nf3::called = true;
+	nf3::arg = a;
+}
+
+void f3c(const nf3::A& a)
+{
+	nf3::called = true;
+	nf3::arg = a;
+}
+
+void t3(const char* ms)
+{
+	Test t(ms);
+	F f;
+	const char* m("message");
+	nf3::reset();
+	clog::out(m, f3, nf3::a);
+	t.a(Spy::last()->message == m, L);
+	t.a(nf3::called, L);
+	t.a(nf3::arg.v == nf3::a.v, L);
+	t.a(nf3::A::copied == false, L);
+}
+
+void t4(const char* ms)
+{
+	Test t(ms);
+	F f;
+	const char* m("message");
+	nf3::reset();
+	clog::out(m, f3c, nf3::a);
+	t.a(Spy::last()->message == m, L);
+	t.a(nf3::called, L);
+	t.a(nf3::arg.v == nf3::a.v, L);
+	t.a(nf3::A::copied == false, L);
 }
 
 } // nlog
@@ -119,6 +221,9 @@ void log_tests()
 	using namespace nlog;
 
 	run("return(void), arg(0)", t1);
+	run("return(void), arg(1)", t2);
+	run("return(void), arg(1, ref)", t3);
+	run("return(void), arg(1, cref)", t4);
 }
 
 } // unnamed
