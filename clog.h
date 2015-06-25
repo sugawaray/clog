@@ -25,10 +25,18 @@ typedef void (*Out)(const Content&);
 Out outfn(outimpl);
 
 template<class F>
-inline void out(const char* m, F f)
+inline void out_void(const char* m, F f)
 {
 	f();
 	outfn(Content(m));
+}
+
+template<class R, class F>
+inline R out(const char* m, F f)
+{
+	R r(f());
+	outfn(Content(m));
+	return r;
 }
 
 template<class R>
@@ -50,21 +58,28 @@ template<class T>
 inline void out(const char* m, void (f)(T), T a)
 {
 	auto bf(std::bind(f, a));
-	out(m, bf);
+	out_void(m, bf);
+}
+
+template<class R, class T>
+inline R out(const char* m, R (f)(T), T a)
+{
+	auto bf(std::bind(f, a));
+	return out<R>(m, bf);
 }
 
 template<class T>
 inline void out(const char* m, void (f)(T&), T& a)
 {
 	auto bf(std::bind(f, std::ref(a)));
-	out(m, bf);
+	out_void(m, bf);
 }
 
 template<class T>
 inline void out(const char* m, void (f)(const T&), const T& a)
 {
 	auto bf(std::bind(f, std::cref(a)));
-	out(m, bf);
+	out_void(m, bf);
 }
 
 } // clog

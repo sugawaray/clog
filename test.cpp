@@ -202,7 +202,25 @@ void t5(const char* ms)
 	t.a(r == 1, L);
 	t.a(Spy::last()->message == m, L);
 	t.a(nf::called, L);
-	t.a(nf::A::copied == false, L);
+}
+
+int f1_1(int v)
+{
+	nf::called = true;
+	nf::arg.v = v;
+	return 1;
+}
+
+void t6(const char* ms)
+{
+	Test t(ms);
+	F f;
+	const char* m("message");
+	nf::reset();
+	int r(clog::out(m, f1_1, 2));
+	t.a(r == 1, L);
+	t.a(Spy::last()->message == m, L);
+	t.a(nf::called, L);
 }
 
 } // nlog
@@ -230,6 +248,7 @@ void log_tests()
 	run("return(void), arg(1, ref)", t3);
 	run("return(void), arg(1, cref)", t4);
 	run("return(int), arg(0)", t5);
+	run("return(int), arg(1)", t6);
 }
 
 } // unnamed
