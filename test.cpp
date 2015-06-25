@@ -81,55 +81,7 @@ public:
 	}
 };
 
-bool f1_called(false);
-void f1()
-{
-	f1_called = true;
-}
-
-void t1(const char* ms)
-{
-	Test t(ms);
-	F f;
-	const char* m("message");
-	f1_called = false;
-	clog::out(m, f1);
-	t.a(Spy::last()->message == m, L);
-	t.a(f1_called, L);
-}
-
-namespace nf2 {
-
-bool called(false);
-int arg(-1);
-
-void reset()
-{
-	called = false;
-	arg = -1;
-}
-
-} // nf2
-
-void f2(int a)
-{
-	nf2::called = true;
-	nf2::arg = a;
-}
-
-void t2(const char* ms)
-{
-	Test t(ms);
-	F f;
-	const char* m("message");
-	nf2::reset();
-	clog::out(m, f2, 1);
-	t.a(Spy::last()->message == m, L);
-	t.a(nf2::called, L);
-	t.a(nf2::arg == 1, L);
-}
-
-namespace nf3 {
+namespace nf {
 
 bool called;
 
@@ -160,18 +112,52 @@ void reset()
 	A::copied = false;
 }
 
-} // nf3
+} // nf
 
-void f3(nf3::A& a)
+void f1()
 {
-	nf3::called = true;
-	nf3::arg = a;
+	nf::called = true;
 }
 
-void f3c(const nf3::A& a)
+void t1(const char* ms)
 {
-	nf3::called = true;
-	nf3::arg = a;
+	Test t(ms);
+	F f;
+	const char* m("message");
+	nf::reset();
+	clog::out(m, f1);
+	t.a(Spy::last()->message == m, L);
+	t.a(nf::called, L);
+}
+
+void f2(int a)
+{
+	nf::called = true;
+	nf::arg.v = a;
+}
+
+void t2(const char* ms)
+{
+	Test t(ms);
+	F f;
+	const char* m("message");
+	nf::reset();
+	clog::out(m, f2, 1);
+	t.a(Spy::last()->message == m, L);
+	t.a(nf::called, L);
+	t.a(nf::arg.v == 1, L);
+}
+
+void f3(nf::A& a)
+{
+	nf::called = true;
+	nf::arg = a;
+}
+
+void f3c(const nf::A& a)
+{
+	nf::called = true;
+	nf::arg = a;
 }
 
 void t3(const char* ms)
@@ -179,12 +165,12 @@ void t3(const char* ms)
 	Test t(ms);
 	F f;
 	const char* m("message");
-	nf3::reset();
-	clog::out(m, f3, nf3::a);
+	nf::reset();
+	clog::out(m, f3, nf::a);
 	t.a(Spy::last()->message == m, L);
-	t.a(nf3::called, L);
-	t.a(nf3::arg.v == nf3::a.v, L);
-	t.a(nf3::A::copied == false, L);
+	t.a(nf::called, L);
+	t.a(nf::arg.v == nf::a.v, L);
+	t.a(nf::A::copied == false, L);
 }
 
 void t4(const char* ms)
@@ -192,12 +178,12 @@ void t4(const char* ms)
 	Test t(ms);
 	F f;
 	const char* m("message");
-	nf3::reset();
-	clog::out(m, f3c, nf3::a);
+	nf::reset();
+	clog::out(m, f3c, nf::a);
 	t.a(Spy::last()->message == m, L);
-	t.a(nf3::called, L);
-	t.a(nf3::arg.v == nf3::a.v, L);
-	t.a(nf3::A::copied == false, L);
+	t.a(nf::called, L);
+	t.a(nf::arg.v == nf::a.v, L);
+	t.a(nf::A::copied == false, L);
 }
 
 } // nlog
