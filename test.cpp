@@ -1,5 +1,6 @@
 #include "clog.h"
 #include "nomagic.h"
+#include <stdexcept>
 
 #define L	(loc(__FILE__, __LINE__))
 
@@ -112,6 +113,9 @@ void reset()
 	A::copied = false;
 }
 
+struct E {
+};
+
 } // nf
 
 void f1()
@@ -223,6 +227,27 @@ void t6(const char* ms)
 	t.a(nf::called, L);
 }
 
+void f0e()
+{
+	throw nf::E();
+}
+
+void t7(const char* ms)
+{
+	Test t(ms);
+	F f;
+	const char* m("message");
+	nf::reset();
+	try {
+		clog::out(m, f0e);
+		throw std::logic_error("test");
+	}
+	catch (const nf::E&) {
+	}
+	t.a(Spy::last()->message == m, L);
+	t.a(Spy::last()->exception, L);
+}
+
 } // nlog
 
 using nomagic::run;
@@ -249,6 +274,7 @@ void log_tests()
 	run("return(void), arg(1, cref)", t4);
 	run("return(int), arg(0)", t5);
 	run("return(int), arg(1)", t6);
+	run("return(void), arg(0), exception", t7);
 }
 
 } // unnamed

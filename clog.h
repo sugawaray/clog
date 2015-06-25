@@ -11,9 +11,11 @@ using std::string;
 
 struct Content {
 	string message;
+	bool exception;
 
 	Content(const string& message)
-		:	message(message) {
+		:	message(message),
+			exception(false) {
 	}
 };
 
@@ -50,8 +52,16 @@ inline R out(const char* m, R (f)())
 
 inline void out(const char* m, void (f)())
 {
-	f();
-	outfn(Content(m));
+	try {
+		f();
+		outfn(Content(m));
+	}
+	catch (...) {
+		Content c(m);
+		c.exception = true;
+		outfn(c);
+		throw;
+	}
 }
 
 template<class T>
