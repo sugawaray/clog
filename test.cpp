@@ -201,7 +201,6 @@ void t5(const char* ms)
 	int r(clog::out(m, f1_0));
 	t.a(r == 1, L);
 	t.a(Spy::last()->message == m, L);
-	t.a(Spy::last()->return_value.i == 1, L);
 	t.a(nf::called, L);
 	t.a(nf::A::copied == false, L);
 }
