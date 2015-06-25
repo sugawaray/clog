@@ -1,6 +1,7 @@
 #ifndef __NCLOG_CLOG_H__
 #define __NCLOG_CLOG_H__
 
+#include <algorithm>
 #include <functional>
 #include <string>
 
@@ -11,9 +12,14 @@ using std::string;
 
 struct Content {
 	string message;
+	union {
+		int i;
+	} return_value;
 
 	Content(const string& message)
 		:	message(message) {
+		std::fill_n(reinterpret_cast<char*>(&return_value),
+			sizeof return_value, 0);
 	}
 };
 
@@ -26,6 +32,21 @@ Out outfn(outimpl);
 
 template<class F>
 inline void out(const char* m, F f)
+{
+	f();
+	outfn(Content(m));
+}
+
+template<class R>
+inline R out(const char* m, R (f)())
+{
+	Content c(m);
+	c.return_value.i = f();
+	outfn(c);
+	return c.return_value.i;
+}
+
+inline void out(const char* m, void (f)())
 {
 	f();
 	outfn(Content(m));
