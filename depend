@@ -1,4 +1,4 @@
-main.o: main.cpp outimpl_test.h test.h
+main.o: main.cpp clog.h content.h outimpl.h outimpl_test.h test.h
 test.o: test.cpp clog.h content.h nomagic.h macros.h test.h
 outimpl.o: outimpl.cpp content.h outimpl.h
 outimpl_test.o: outimpl_test.cpp content.h outimpl.h outimpl_test.h \
