@@ -31,8 +31,3 @@ $(TARGET) : $(SRCS)
 		$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $(SRCS);	\
 	fi
 
-#test.cpp : clog.h content.h nomagic.h test.h
-#
-#outimpl_test.cpp : outimpl_test.h
-#
-#main.cpp : test.h outimpl_test.h
