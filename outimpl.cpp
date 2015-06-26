@@ -9,7 +9,7 @@ std::ostream* stream(&std::cout);
 
 void outimpl(const Content& content)
 {
-	(*stream) << content.message << std::endl;
+	(*stream) << to_string(content) << std::endl;
 }
 
 std::string to_string(const Content& content)
