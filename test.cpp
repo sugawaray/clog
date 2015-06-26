@@ -1,8 +1,8 @@
 #include "clog.h"
-#include "nomagic.h"
+#include <nomagic.h>
 #include <stdexcept>
 
-#define L	(loc(__FILE__, __LINE__))
+#include "macros.h"
 
 namespace {
 
@@ -279,9 +279,15 @@ void log_tests()
 
 } // unnamed
 
-int main()
+#include "test.h"
+
+namespace test {
+
+void run_clog_tests()
 {
 	spy_tests();
 	log_tests();
-	return 0;
 }
+
+} // test
+

@@ -1,23 +1,13 @@
 #ifndef __NCLOG_CLOG_H__
 #define __NCLOG_CLOG_H__
 
+#include "content.h"
 #include <functional>
-#include <string>
 
 namespace {
 namespace clog {
 
-using std::string;
-
-struct Content {
-	string message;
-	bool exception;
-
-	Content(const string& message)
-		:	message(message),
-			exception(false) {
-	}
-};
+using ::clog::Content;
 
 void outimpl(const Content&)
 {
