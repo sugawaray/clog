@@ -9,7 +9,7 @@ namespace {
 using nomagic::loc;
 using nomagic::Test;
 
-using clog::Content;
+using clogcmn::Content;
 
 class Spy {
 public:

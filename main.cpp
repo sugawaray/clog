@@ -31,8 +31,8 @@ void example()
 {
 	cout << "some examples start" << endl;
 
-	::clog::stream = &cout;
-	clog::outfn = ::clog::outimpl;
+	impl::stream = &cout;
+	clog::outfn = impl::outimpl;
 	namespace n = clog;
 	if (n::out("fb0", fb0)) {
 		if (n::out("fi1", fi1, 0) == 0) {
@@ -57,7 +57,7 @@ int main()
 {
 	cout << "test start" << endl;
 	test::run_clog_tests();
-	::clog::test::run_outimpl_tests();
+	impl::test::run_outimpl_tests();
 	cout << "test end" << endl;
 
 	example();

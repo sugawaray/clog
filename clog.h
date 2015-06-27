@@ -1,5 +1,5 @@
-#ifndef __NCLOG_CLOG_H__
-#define __NCLOG_CLOG_H__
+#ifndef __UNNAMED_CLOG_CLOG_H__
+#define __UNNAMED_CLOG_CLOG_H__
 
 #include "content.h"
 #include <functional>
@@ -7,7 +7,7 @@
 namespace {
 namespace clog {
 
-using ::clog::Content;
+using clogcmn::Content;
 
 void outimpl(const Content&)
 {
@@ -85,4 +85,4 @@ inline void out(const char* m, void (f)(const T&), const T& a)
 } // clog
 } // unnamed
 
-#endif // __NCLOG_CLOG_H__
+#endif // __UNNAMED_CLOG_CLOG_H__

@@ -3,7 +3,7 @@
 #include <iostream>
 #include <sstream>
 
-namespace clog {
+namespace impl {
 
 std::ostream* stream(&std::cout);
 
@@ -23,4 +23,4 @@ std::string to_string(const Content& content)
 	}
 }
 
-} // clog
+} // impl

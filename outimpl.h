@@ -1,17 +1,22 @@
-#ifndef __CLOG_OUTIMPL_H__
-#define __CLOG_OUTIMPL_H__
+#ifndef __IMPL_OUTIMPL_H__
+#define __IMPL_OUTIMPL_H__
 
 #include <ostream>
 #include <string>
 
-namespace clog {
+namespace clogcmn {
 	struct Content;
+} // clogcmn
+
+namespace impl {
+
+using clogcmn::Content;
 
 extern std::ostream* stream;
 
 extern void outimpl(const Content& content);
 extern std::string to_string(const Content& content);
 
-} // clog
+} // impl
 
-#endif // __CLOG_OUTIMPL_H__
+#endif // __IMPL_OUTIMPL_H__

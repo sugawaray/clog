@@ -1,12 +1,12 @@
 #ifndef __OUTIMPL_TEST_H__
 #define __OUTIMPL_TEST_H__
 
-namespace clog {
+namespace impl {
 namespace test {
 
 extern void run_outimpl_tests();
 
 } // test
-} // clog
+} // impl
 
 #endif // __OUTIMPL_TEST_H__

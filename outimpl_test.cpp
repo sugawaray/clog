@@ -8,7 +8,7 @@
 
 #include "macros.h"
 
-namespace clog {
+namespace impl {
 namespace test {
 
 namespace {
@@ -63,4 +63,4 @@ void run_outimpl_tests()
 }
 
 } // test
-} // clog
+} // impl

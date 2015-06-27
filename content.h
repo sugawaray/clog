@@ -1,9 +1,9 @@
-#ifndef __CLOG_CONTENT_H__
-#define __CLOG_CONTENT_H__
+#ifndef __CLOGCMN_CONTENT_H__
+#define __CLOGCMN_CONTENT_H__
 
 #include <string>
 
-namespace clog {
+namespace clogcmn {
 
 using std::string;
 
@@ -17,6 +17,6 @@ struct Content {
 	}
 };
 
-} // clog
+} // clogcmn
 
-#endif // __CLOG_CONTENT_H__
+#endif // __CLOGCMN_CONTENT_H__
