@@ -1,12 +1,12 @@
-#include "content.h"
 #include "outimpl.h"
 #include "outimpl_test.h"
-#include "utils.h"
+#include <content.h>
+#include <utils.h>
 #include <nomagic.h>
 #include <iostream>
 #include <sstream>
 
-#include "macros.h"
+#include <macros.h>
 
 namespace impl {
 namespace test {

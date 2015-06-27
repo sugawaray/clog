@@ -1,6 +1,6 @@
-#include "clog.h"
-#include "outimpl.h"
-#include "outimpl_test.h"
+#include <clog.h>
+#include "an_impl/outimpl.h"
+#include "an_impl/outimpl_test.h"
 #include "test.h"
 #include <iostream>
 #include <stdexcept>
