@@ -35,8 +35,7 @@ template<class R>
 inline R out(const char* m, R (f)())
 {
 	R r(f());
-	Content c(m);
-	outfn(c);
+	outfn(Content(m));
 	return r;
 }
 
