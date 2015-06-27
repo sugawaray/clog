@@ -74,11 +74,25 @@ inline void out(const char* m, void (f)(T&), T& a)
 	out_void(m, bf);
 }
 
+template<class R, class T>
+inline R out(const char* m, R(f)(T&), T& a)
+{
+	auto bf(std::bind(f, std::ref(a)));
+	return out<R>(m, bf);
+}
+
 template<class T>
 inline void out(const char* m, void (f)(const T&), const T& a)
 {
 	auto bf(std::bind(f, std::cref(a)));
 	out_void(m, bf);
+}
+
+template<class R, class T>
+inline R out(const char* m, R(f)(const T&), const T& a)
+{
+	auto bf(std::bind(f, std::cref(a)));
+	return out<R>(m, bf);
 }
 
 } // clog

@@ -1,6 +1,9 @@
 #include <clog/clog.h>
 #include <nomagic.h>
+#include <functional>
 #include <stdexcept>
+#include <string>
+#include <type_traits>
 
 #include "macros.h"
 
@@ -140,16 +143,86 @@ void f2(int a)
 	nf::arg.v = a;
 }
 
+class Test_1 {
+public:
+	Test_1(const char* ms)
+		:	t(ms) {
+	}
+
+	void operator()() {
+		F f;
+		m = "message";
+		nf::reset();
+		prepare_call();
+		call_and_assert();
+		t.a(Spy::last()->message == m, L);
+		t.a(nf::called, L);
+		t.a(nf::arg.v == nf::a.v, L);
+		t.a(nf::A::copied == false, L);
+	}
+protected:
+	virtual void call_and_assert() = 0;
+	virtual void prepare_call() {
+	}
+
+	Test t;
+	const char* m;
+};
+
+namespace d {
+
+struct Ret_not_void { };
+struct Ret_void { };
+
+template<class T>
+struct Ret_tag {
+	typedef Ret_not_void type;
+};
+template<>
+struct Ret_tag<void> {
+	typedef Ret_void type;
+};
+
+} // d
+
+template<class F>
+class Test_1v : public Test_1 {
+public:
+	Test_1v(F f, const char* ms) : Test_1(ms), f(f) {
+	}
+
+protected:
+	void call_and_assert() {
+		typedef typename d::Ret_tag<
+			decltype(clog::out(m, f, nf::a.v))
+				>::type tag;
+		call(tag());
+	}
+	void prepare_call() {
+		nf::a.v = 2;
+	}
+private:
+	template<class T>
+	void call(T forwarder) {
+		t.a(clog::out(m, f, nf::a.v) == 1, L);
+	}
+
+	void call(d::Ret_void dummy) {
+		clog::out(m, f, nf::a.v);
+	}
+
+	F f;
+};
+
+template<class F>
+inline Test_1v<F> test_1v(F f, const char* ms)
+{
+	return Test_1v<F>(f, ms);
+}
+
 void t2(const char* ms)
 {
-	Test t(ms);
-	F f;
-	const char* m("message");
-	nf::reset();
-	clog::out(m, f2, 1);
-	t.a(Spy::last()->message == m, L);
-	t.a(nf::called, L);
-	t.a(nf::arg.v == 1, L);
+	(test_1v(f2, ms))();
 }
 
 void f3(nf::A& a)
@@ -164,30 +237,70 @@ void f3c(const nf::A& a)
 	nf::arg = a;
 }
 
+template<class F>
+class Test_1r : public Test_1 {
+public:
+	Test_1r(F f, const char* ms) : Test_1(ms), f(f) {
+	}
+
+protected:
+	void call_and_assert() {
+		typedef typename d::Ret_tag<
+			decltype(clog::out(m, f, nf::a))
+				>::type tag;
+		call(tag());
+	}
+private:
+	template<class T>
+	void call(T forwarder) {
+		t.a(clog::out(m, f, nf::a) == 1, L);
+	}
+
+	void call(d::Ret_void dummy) {
+		clog::out(m, f, nf::a);
+	}
+
+	F f;
+};
+
+template<class F>
+inline Test_1r<F> test_1r(F f, const char* ms)
+{
+	return Test_1r<F>(f, ms);
+}
+
 void t3(const char* ms)
 {
-	Test t(ms);
-	F f;
-	const char* m("message");
-	nf::reset();
-	clog::out(m, f3, nf::a);
-	t.a(Spy::last()->message == m, L);
-	t.a(nf::called, L);
-	t.a(nf::arg.v == nf::a.v, L);
-	t.a(nf::A::copied == false, L);
+	(test_1r(f3, ms))();
+}
+
+int f1_1r(nf::A& a)
+{
+	nf::called = true;
+	nf::arg = a;
+	return 1;
+}
+
+int f1_1rc(const nf::A& a)
+{
+	nf::called = true;
+	nf::arg = a;
+	return 1;
+}
+
+void t8(const char* ms)
+{
+	(test_1r(f1_1r, ms))();
+}
+
+void t9(const char* ms)
+{
+	(test_1r(f1_1rc, ms))();
 }
 
 void t4(const char* ms)
 {
-	Test t(ms);
-	F f;
-	const char* m("message");
-	nf::reset();
-	clog::out(m, f3c, nf::a);
-	t.a(Spy::last()->message == m, L);
-	t.a(nf::called, L);
-	t.a(nf::arg.v == nf::a.v, L);
-	t.a(nf::A::copied == false, L);
+	(test_1r(f3c, ms))();
 }
 
 int f1_0()
@@ -217,14 +330,7 @@ int f1_1(int v)
 
 void t6(const char* ms)
 {
-	Test t(ms);
-	F f;
-	const char* m("message");
-	nf::reset();
-	int r(clog::out(m, f1_1, 2));
-	t.a(r == 1, L);
-	t.a(Spy::last()->message == m, L);
-	t.a(nf::called, L);
+	(test_1v(f1_1, ms))();
 }
 
 void f0e()
@@ -274,6 +380,8 @@ void log_tests()
 	run("return(void), arg(1, cref)", t4);
 	run("return(int), arg(0)", t5);
 	run("return(int), arg(1)", t6);
+	run("return(int), arg(1, ref)", t8);
+	run("return(int), arg(1, cref)", t9);
 	run("return(void), arg(0), exception", t7);
 }
 
