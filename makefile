@@ -12,11 +12,11 @@ ROOTDIR = $$($(PWD))
 INCPATH = -I$(ROOTDIR) -I$(ROOTDIR)/otherlibs
 
 TARGET = test
-OBJS = main.o test.o
+OBJS = main.o
 SRCS = $(OBJS:.o=.cpp)
 DEPENDOPT = -MM
 
-DIRS = an_impl
+DIRS = an_impl clog
 
 CALL_MAKE = 1
 MAKEFILE = makefile
