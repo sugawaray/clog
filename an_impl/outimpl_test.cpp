@@ -1,6 +1,6 @@
 #include "outimpl.h"
 #include "outimpl_test.h"
-#include <content.h>
+#include <clog/content.h>
 #include <utils.h>
 #include <nomagic.h>
 #include <iostream>

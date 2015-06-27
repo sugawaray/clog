@@ -1,7 +1,7 @@
 #ifndef __UNNAMED_CLOG_CLOG_H__
 #define __UNNAMED_CLOG_CLOG_H__
 
-#include <content.h>
+#include "content.h"
 #include <functional>
 
 namespace {

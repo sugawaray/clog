@@ -1,5 +1,5 @@
 #include "outimpl.h"
-#include <content.h>
+#include <clog/content.h>
 #include <iostream>
 #include <sstream>
 
