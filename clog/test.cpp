@@ -128,16 +128,15 @@ void f1()
 
 namespace d {
 
-struct Ret_not_void { };
-struct Ret_void { };
+using std::enable_if;
+using std::is_void;
 
 template<class T>
-struct Ret_tag {
-	typedef Ret_not_void type;
+struct enable_void : enable_if<is_void<T>::value> {
 };
-template<>
-struct Ret_tag<void> {
-	typedef Ret_void type;
+
+template<class T>
+struct disable_void : enable_if<!is_void<T>::value> {
 };
 
 } // d
@@ -174,10 +173,7 @@ public:
 	}
 protected:
 	void call_and_assert() {
-		typedef typename d::Ret_tag<
-			decltype(clog::out(m, f))
-				>::type tag;
-		call(tag());
+		call<decltype(clog::out(m, f))>();
 	}
 	void verify() {
 		t.a(Spy::last()->message == m, L);
@@ -187,12 +183,12 @@ protected:
 	F f;
 private:
 	template<class T>
-	void call(T forwarder) {
-		Test_common::t.a(clog::out(m, f) == 1, L);
-	}
-
-	void call(d::Ret_void dummy) {
+	void call(typename d::enable_void<T>::type* = 0) {
 		clog::out(m, f);
+	}
+	template<class T>
+	void call(typename d::disable_void<T>::type* = 0) {
+		t.a(clog::out(m, f) == 1, L);
 	}
 };
 
@@ -241,21 +237,19 @@ protected:
 	using Test_1<F>::f;
 
 	void call_and_assert() {
-		typedef typename d::Ret_tag<
-			decltype(clog::out(m, f, nf::a.v))
-				>::type tag;
-		call(tag());
+		call<decltype(clog::out(m, f, nf::a.v))>();
 	}
 	void prepare_call() {
 		nf::a.v = 2;
 	}
 private:
 	template<class T>
-	void call(T forwarder) {
+	void call(typename d::disable_void<T>::type* = 0) {
 		Test_common::t.a(clog::out(m, f, nf::a.v) == 1, L);
 	}
 
-	void call(d::Ret_void dummy) {
+	template<class T>
+	void call(typename d::enable_void<T>::type* = 0) {
 		clog::out(m, f, nf::a.v);
 	}
 };
@@ -294,18 +288,16 @@ protected:
 	using Test_1<F>::f;
 
 	void call_and_assert() {
-		typedef typename d::Ret_tag<
-			decltype(clog::out(m, f, nf::a))
-				>::type tag;
-		call(tag());
+		call<decltype(clog::out(m, f, nf::a))>();
 	}
 private:
 	template<class T>
-	void call(T forwarder) {
+	void call(typename d::disable_void<T>::type* = 0) {
 		Test_common::t.a(clog::out(m, f, nf::a) == 1, L);
 	}
 
-	void call(d::Ret_void dummy) {
+	template<class T>
+	void call(typename d::enable_void<T>::type* = 0) {
 		clog::out(m, f, nf::a);
 	}
 };
