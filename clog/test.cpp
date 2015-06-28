@@ -126,49 +126,6 @@ void f1()
 	nf::called = true;
 }
 
-void t1(const char* ms)
-{
-	Test t(ms);
-	F f;
-	const char* m("message");
-	nf::reset();
-	clog::out(m, f1);
-	t.a(Spy::last()->message == m, L);
-	t.a(nf::called, L);
-}
-
-void f2(int a)
-{
-	nf::called = true;
-	nf::arg.v = a;
-}
-
-class Test_1 {
-public:
-	Test_1(const char* ms)
-		:	t(ms) {
-	}
-
-	void operator()() {
-		F f;
-		m = "message";
-		nf::reset();
-		prepare_call();
-		call_and_assert();
-		t.a(Spy::last()->message == m, L);
-		t.a(nf::called, L);
-		t.a(nf::arg.v == nf::a.v, L);
-		t.a(nf::A::copied == false, L);
-	}
-protected:
-	virtual void call_and_assert() = 0;
-	virtual void prepare_call() {
-	}
-
-	Test t;
-	const char* m;
-};
-
 namespace d {
 
 struct Ret_not_void { };
@@ -185,13 +142,104 @@ struct Ret_tag<void> {
 
 } // d
 
-template<class F>
-class Test_1v : public Test_1 {
+class Test_common {
 public:
-	Test_1v(F f, const char* ms) : Test_1(ms), f(f) {
+	Test_common(const char* ms)
+		:	t(ms) {
+	}
+
+	void operator()() {
+		F f;
+		m = "message";
+		nf::reset();
+		prepare_call();
+		call_and_assert();
+		verify();
+	}
+protected:
+	virtual void call_and_assert() = 0;
+	virtual void prepare_call() {
+	}
+	virtual void verify() = 0;
+
+	Test t;
+	const char* m;
+};
+
+template<class F>
+class Test_0 : public Test_common {
+public:
+	Test_0(F f, const char* ms)
+		:	Test_common(ms), f(f) {
+	}
+protected:
+	void call_and_assert() {
+		typedef typename d::Ret_tag<
+			decltype(clog::out(m, f))
+				>::type tag;
+		call(tag());
+	}
+	void verify() {
+		t.a(Spy::last()->message == m, L);
+		t.a(nf::called, L);
+	}
+
+	F f;
+private:
+	template<class T>
+	void call(T forwarder) {
+		Test_common::t.a(clog::out(m, f) == 1, L);
+	}
+
+	void call(d::Ret_void dummy) {
+		clog::out(m, f);
+	}
+};
+
+template<class F>
+inline Test_0<F> test_0(F f, const char* ms)
+{
+	return Test_0<F>(f, ms);
+}
+
+void t1(const char* ms)
+{
+	(test_0(f1, ms))();
+}
+
+void f2(int a)
+{
+	nf::called = true;
+	nf::arg.v = a;
+}
+
+template<class F>
+class Test_1 : public Test_common {
+public:
+	Test_1(F f, const char* ms) : Test_common(ms), f(f) {
 	}
 
 protected:
+	void verify() {
+		t.a(Spy::last()->message == m, L);
+		t.a(nf::called, L);
+		t.a(nf::arg.v == nf::a.v, L);
+		t.a(nf::A::copied == false, L);
+	}
+
+	F f;
+};
+
+template<class F>
+class Test_1v : public Test_1<F> {
+public:
+	Test_1v(F f, const char* ms) : Test_1<F>(f, ms) {
+	}
+
+protected:
+	using Test_common::m;
+	using Test_1<F>::f;
+
 	void call_and_assert() {
 		typedef typename d::Ret_tag<
 			decltype(clog::out(m, f, nf::a.v))
@@ -204,14 +252,12 @@ protected:
 private:
 	template<class T>
 	void call(T forwarder) {
-		t.a(clog::out(m, f, nf::a.v) == 1, L);
+		Test_common::t.a(clog::out(m, f, nf::a.v) == 1, L);
 	}
 
 	void call(d::Ret_void dummy) {
 		clog::out(m, f, nf::a.v);
 	}
-
-	F f;
 };
 
 template<class F>
@@ -238,12 +284,15 @@ void f3c(const nf::A& a)
 }
 
 template<class F>
-class Test_1r : public Test_1 {
+class Test_1r : public Test_1<F> {
 public:
-	Test_1r(F f, const char* ms) : Test_1(ms), f(f) {
+	Test_1r(F f, const char* ms) : Test_1<F>(f, ms) {
 	}
 
 protected:
+	using Test_common::m;
+	using Test_1<F>::f;
+
 	void call_and_assert() {
 		typedef typename d::Ret_tag<
 			decltype(clog::out(m, f, nf::a))
@@ -253,14 +302,12 @@ protected:
 private:
 	template<class T>
 	void call(T forwarder) {
-		t.a(clog::out(m, f, nf::a) == 1, L);
+		Test_common::t.a(clog::out(m, f, nf::a) == 1, L);
 	}
 
 	void call(d::Ret_void dummy) {
 		clog::out(m, f, nf::a);
 	}
-
-	F f;
 };
 
 template<class F>
@@ -311,14 +358,7 @@ int f1_0()
 
 void t5(const char* ms)
 {
-	Test t(ms);
-	F f;
-	const char* m("message");
-	nf::reset();
-	int r(clog::out(m, f1_0));
-	t.a(r == 1, L);
-	t.a(Spy::last()->message == m, L);
-	t.a(nf::called, L);
+	(test_0(f1_0, ms))();
 }
 
 int f1_1(int v)
