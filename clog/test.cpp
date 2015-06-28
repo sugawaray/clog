@@ -233,7 +233,8 @@ public:
 	}
 
 protected:
-	using Test_common::m;
+	using Test_1<F>::m;
+	using Test_1<F>::t;
 	using Test_1<F>::f;
 
 	void call_and_assert() {
@@ -245,7 +246,7 @@ protected:
 private:
 	template<class T>
 	void call(typename d::disable_void<T>::type* = 0) {
-		Test_common::t.a(clog::out(m, f, nf::a.v) == 1, L);
+		t.a(clog::out(m, f, nf::a.v) == 1, L);
 	}
 
 	template<class T>
@@ -284,7 +285,8 @@ public:
 	}
 
 protected:
-	using Test_common::m;
+	using Test_1<F>::m;
+	using Test_1<F>::t;
 	using Test_1<F>::f;
 
 	void call_and_assert() {
@@ -293,7 +295,7 @@ protected:
 private:
 	template<class T>
 	void call(typename d::disable_void<T>::type* = 0) {
-		Test_common::t.a(clog::out(m, f, nf::a) == 1, L);
+		t.a(clog::out(m, f, nf::a) == 1, L);
 	}
 
 	template<class T>
