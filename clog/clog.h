@@ -16,21 +16,6 @@ void outimpl(const Content&)
 typedef void (*Out)(const Content&);
 Out outfn(outimpl);
 
-template<class F>
-inline void out_void(const char* m, F f)
-{
-	f();
-	outfn(Content(m));
-}
-
-template<class R, class F>
-inline R out(const char* m, F f)
-{
-	R r(f());
-	outfn(Content(m));
-	return r;
-}
-
 namespace d {
 
 inline void outex(const char* m)
@@ -41,6 +26,27 @@ inline void outex(const char* m)
 }
 
 } // d
+
+template<class F>
+inline void out_void(const char* m, F f)
+{
+	try {
+		f();
+		outfn(Content(m));
+	}
+	catch (...) {
+		d::outex(m);
+		throw;
+	}
+}
+
+template<class R, class F>
+inline R out(const char* m, F f)
+{
+	R r(f());
+	outfn(Content(m));
+	return r;
+}
 
 template<class R>
 inline R out(const char* m, R (f)())

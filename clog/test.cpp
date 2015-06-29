@@ -195,16 +195,16 @@ private:
 using std::logic_error;
 
 template<class F>
-class Test_0_ex : public Test_common {
+class Test_ex : public Test_common {
 public:
-	Test_0_ex(F f, const char* ms)
+	Test_ex(F f, const char* ms)
 		:	Test_common(ms), f(f) {
 	}
 
 protected:
 	void call_and_assert() {
 		try {
-			clog::out(m, f);
+			call();
 			logic_error("test");
 		}
 		catch (const nf::E&) {
@@ -216,13 +216,53 @@ protected:
 		t.a(Spy::last()->exception, L);
 	}
 
+	virtual void call() = 0;
+
 	F f;
+};
+
+template<class F>
+class Test_0_ex : public Test_ex<F> {
+public:
+	Test_0_ex(F f, const char* ms)
+		:	Test_ex<F>(f, ms) {
+	}
+
+protected:
+	using Test_ex<F>::f;
+	using Test_ex<F>::m;
+
+	void call() {
+		clog::out(m, f);
+	}
+};
+
+template<class F>
+class Test_1_ex : public Test_ex<F> {
+public:
+	Test_1_ex(F f, const char* ms)
+		:	Test_ex<F>(f, ms) {
+	}
+
+protected:
+	using Test_ex<F>::f;
+	using Test_ex<F>::m;
+
+	void call() {
+		clog::out(m, f, 1);
+	}
 };
 
 template<class F>
 inline Test_0_ex<F> test_0_ex(F f, const char* ms)
 {
 	return Test_0_ex<F>(f, ms);
+}
+
+template<class F>
+inline Test_1_ex<F> test_1_ex(F f, const char* ms)
+{
+	return Test_1_ex<F>(f, ms);
 }
 
 template<class F>
@@ -420,6 +460,16 @@ void t10(const char* ms)
 	(test_0_ex(f0ei, ms))();
 }
 
+void f1e(int a)
+{
+	throw nf::E();
+}
+
+void t11(const char* ms)
+{
+	(test_1_ex(f1e, ms))();
+}
+
 } // nlog
 
 using nomagic::run;
@@ -450,6 +500,7 @@ void log_tests()
 	run("return(int), arg(1, cref)", t8);
 	run("return(void), arg(0), exception", t9);
 	run("return(int), arg(0), exception", t10);
+	run("return(void), arg(1)", t11);
 }
 
 } // unnamed
