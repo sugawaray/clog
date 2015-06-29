@@ -192,6 +192,39 @@ private:
 	}
 };
 
+using std::logic_error;
+
+template<class F>
+class Test_0_ex : public Test_common {
+public:
+	Test_0_ex(F f, const char* ms)
+		:	Test_common(ms), f(f) {
+	}
+
+protected:
+	void call_and_assert() {
+		try {
+			clog::out(m, f);
+			logic_error("test");
+		}
+		catch (const nf::E&) {
+		}
+	}
+
+	void verify() {
+		t.a(Spy::last()->message == m, L);
+		t.a(Spy::last()->exception, L);
+	}
+
+	F f;
+};
+
+template<class F>
+inline Test_0_ex<F> test_0_ex(F f, const char* ms)
+{
+	return Test_0_ex<F>(f, ms);
+}
+
 template<class F>
 inline Test_0<F> test_0(F f, const char* ms)
 {
@@ -374,18 +407,17 @@ void f0e()
 
 void t9(const char* ms)
 {
-	Test t(ms);
-	F f;
-	const char* m("message");
-	nf::reset();
-	try {
-		clog::out(m, f0e);
-		throw std::logic_error("test");
-	}
-	catch (const nf::E&) {
-	}
-	t.a(Spy::last()->message == m, L);
-	t.a(Spy::last()->exception, L);
+	(test_0_ex(f0e, ms))();
+}
+
+int f0ei()
+{
+	throw nf::E();
+}
+
+void t10(const char* ms)
+{
+	(test_0_ex(f0ei, ms))();
 }
 
 } // nlog
@@ -417,6 +449,7 @@ void log_tests()
 	run("return(int), arg(1, ref)", t7);
 	run("return(int), arg(1, cref)", t8);
 	run("return(void), arg(0), exception", t9);
+	run("return(int), arg(0), exception", t10);
 }
 
 } // unnamed

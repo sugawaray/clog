@@ -31,12 +31,29 @@ inline R out(const char* m, F f)
 	return r;
 }
 
+namespace d {
+
+inline void outex(const char* m)
+{
+	Content c(m);
+	c.exception = true;
+	outfn(c);
+}
+
+} // d
+
 template<class R>
 inline R out(const char* m, R (f)())
 {
-	R r(f());
-	outfn(Content(m));
-	return r;
+	try {
+		R r(f());
+		outfn(Content(m));
+		return r;
+	}
+	catch (...) {
+		d::outex(m);
+		throw;
+	}
 }
 
 inline void out(const char* m, void (f)())
@@ -46,9 +63,7 @@ inline void out(const char* m, void (f)())
 		outfn(Content(m));
 	}
 	catch (...) {
-		Content c(m);
-		c.exception = true;
-		outfn(c);
+		d::outex(m);
 		throw;
 	}
 }

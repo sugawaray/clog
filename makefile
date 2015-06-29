@@ -51,14 +51,7 @@ compile :
 			"ROOTDIR=$(ROOTDIR)"	\
 			"CALL_MAKE=0" $(OBJS)
 
-$(TARGET) : $(OBJS)
-	@r=$(ROOTDIR) &&	\
-		for i in $(DIRS);	\
-		do	\
-			(cd $$i &&	\
-			$(MAKE) -f $${r}/$(MAKEFILE) -f $(MAKEFILE)	\
-				"ROOTDIR=$$r" compile);	\
-		done
+$(TARGET) : $(OBJS) call_submake
 	@if [ $(CALL_MAKE) -eq 1 ];	\
 	then	\
 		$(MAKE) -f $(MAKEFILE) -f depend	\
@@ -68,6 +61,15 @@ $(TARGET) : $(OBJS)
 		$(LD) -o $@	\
 			$$($(FIND) . -name '*.o') $(LDFLAGS);	\
 	fi
+
+call_submake :
+	@r=$(ROOTDIR) &&	\
+		for i in $(DIRS);	\
+		do	\
+			(cd $$i &&	\
+			$(MAKE) -f $${r}/$(MAKEFILE) -f $(MAKEFILE)	\
+				"ROOTDIR=$$r" compile);	\
+		done
 
 .cpp.o :
 	@if [ $(CALL_MAKE) -ne 1 ];	\
