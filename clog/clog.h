@@ -43,9 +43,15 @@ inline void out_void(const char* m, F f)
 template<class R, class F>
 inline R out(const char* m, F f)
 {
-	R r(f());
-	outfn(Content(m));
-	return r;
+	try {
+		R r(f());
+		outfn(Content(m));
+		return r;
+	}
+	catch (...) {
+		d::outex(m);
+		throw;
+	}
 }
 
 template<class R>
