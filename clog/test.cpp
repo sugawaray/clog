@@ -329,12 +329,12 @@ int f1_1rc(const nf::A& a)
 	return 1;
 }
 
-void t8(const char* ms)
+void t7(const char* ms)
 {
 	(test_1r(f1_1r, ms))();
 }
 
-void t9(const char* ms)
+void t8(const char* ms)
 {
 	(test_1r(f1_1rc, ms))();
 }
@@ -372,7 +372,7 @@ void f0e()
 	throw nf::E();
 }
 
-void t7(const char* ms)
+void t9(const char* ms)
 {
 	Test t(ms);
 	F f;
@@ -414,9 +414,9 @@ void log_tests()
 	run("return(void), arg(1, cref)", t4);
 	run("return(int), arg(0)", t5);
 	run("return(int), arg(1)", t6);
-	run("return(int), arg(1, ref)", t8);
-	run("return(int), arg(1, cref)", t9);
-	run("return(void), arg(0), exception", t7);
+	run("return(int), arg(1, ref)", t7);
+	run("return(int), arg(1, cref)", t8);
+	run("return(void), arg(0), exception", t9);
 }
 
 } // unnamed
