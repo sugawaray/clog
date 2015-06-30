@@ -87,10 +87,24 @@ inline void out(const char* m, void (f)(T), T a)
 	out_void(m, bf);
 }
 
+template<class T1, class T2>
+inline void out(const char* m, void (f)(T1, T2), T1 v1, T2 v2)
+{
+	auto bf(std::bind(f, v1, v2));
+	out_void(m, bf);
+}
+
 template<class R, class T>
 inline R out(const char* m, R (f)(T), T a)
 {
 	auto bf(std::bind(f, a));
+	return out<R>(m, bf);
+}
+
+template<class R, class T1, class T2>
+inline R out(const char* m, R(f)(T1, T2), T1 v1, T2 v2)
+{
+	auto bf(std::bind(f, v1, v2));
 	return out<R>(m, bf);
 }
 

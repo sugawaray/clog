@@ -91,15 +91,16 @@ bool called;
 
 class A {
 public:
-	A() : v(0) {
+	A() : v1(0), v2(0) {
 	}
 
 	A(const A& op)
-		:	v(op.v) {
+		:	v1(op.v1), v2(op.v2) {
 		copied = true;
 	}
 
-	int v;
+	int v1;
+	int v2;
 	static bool copied;
 };
 bool A::copied;
@@ -107,11 +108,15 @@ bool A::copied;
 A a;
 A arg;
 
+const int default_v1(1);
+const int default_v2(2);
+
 void reset()
 {
 	called = false;
 	a = A();
-	a.v = 1;
+	a.v1 = 1;
+	a.v2 = 2;
 	arg = A();
 	A::copied = false;
 }
@@ -279,7 +284,7 @@ void t1(const char* ms)
 void f2(int a)
 {
 	nf::called = true;
-	nf::arg.v = a;
+	nf::arg.v1 = a;
 }
 
 template<class F>
@@ -292,8 +297,45 @@ protected:
 	void verify() {
 		t.a(Spy::last()->message == m, L);
 		t.a(nf::called, L);
-		t.a(nf::arg.v == nf::a.v, L);
+		t.a(nf::arg.v1 == nf::a.v1, L);
 		t.a(nf::A::copied == false, L);
+	}
+
+	F f;
+};
+
+template<class F>
+class Test_2 : public Test_common {
+public:
+	Test_2(F f, const char* ms)
+		:	Test_common(ms), f(f) {
+	}
+
+protected:
+	void prepare_call() {
+		nf::a.v1 = nf::default_v1 + 1;
+		nf::a.v2 = nf::default_v2 + 1;
+	}
+
+	void call_and_assert() {
+		call<decltype(clog::out(m, f, nf::a.v1, nf::a.v2))>();
+	}
+
+	void verify() {
+		t.a(Spy::last()->message == m, L);
+		t.a(nf::called, L);
+		t.a(nf::arg.v1 == nf::a.v1, L);
+		t.a(nf::arg.v2 == nf::a.v2, L);
+	}
+private:
+	template<class T>
+	void call(typename d::enable_void<T>::type* = 0) {
+		clog::out(m, f, nf::a.v1, nf::a.v2);
+	}
+
+	template<class T>
+	void call(typename d::disable_void<T>::type* = 0) {
+		t.a(clog::out(m, f, nf::a.v1, nf::a.v2) == 10, L);
 	}
 
 	F f;
@@ -311,20 +353,21 @@ protected:
 	using Test_1<F>::f;
 
 	void call_and_assert() {
-		call<decltype(clog::out(m, f, nf::a.v))>();
+		call<decltype(clog::out(m, f, nf::a.v1))>();
 	}
 	void prepare_call() {
-		nf::a.v = 2;
+		nf::a.v1 = 2;
+		nf::a.v2 = nf::arg.v2;
 	}
 private:
 	template<class T>
 	void call(typename d::disable_void<T>::type* = 0) {
-		t.a(clog::out(m, f, nf::a.v) == 1, L);
+		t.a(clog::out(m, f, nf::a.v1) == 1, L);
 	}
 
 	template<class T>
 	void call(typename d::enable_void<T>::type* = 0) {
-		clog::out(m, f, nf::a.v);
+		clog::out(m, f, nf::a.v1);
 	}
 };
 
@@ -431,7 +474,7 @@ void t5(const char* ms)
 int f1_1(int v)
 {
 	nf::called = true;
-	nf::arg.v = v;
+	nf::arg.v1 = v;
 	return 1;
 }
 
@@ -480,6 +523,37 @@ void t12(const char* ms)
 	(test_1_ex(f1ei, ms))();
 }
 
+template<class F>
+inline Test_2<F> test_2(F f, const char* ms)
+{
+	return Test_2<F>(f, ms);
+}
+
+void fv2(int v1, int v2)
+{
+	nf::called = true;
+	nf::arg.v1 = v1;
+	nf::arg.v2 = v2;
+}
+
+void t14(const char* ms)
+{
+	(test_2(fv2, ms))();
+}
+
+int fi2(int v1, int v2)
+{
+	nf::called = true;
+	nf::arg.v1 = v1;
+	nf::arg.v2 = v2;
+	return 10;
+}
+
+void t15(const char* ms)
+{
+	(test_2(fi2, ms))();
+}
+
 } // nlog
 
 using nomagic::run;
@@ -512,6 +586,8 @@ void log_tests()
 	run("return(int), arg(0), exception", t10);
 	run("return(void), arg(1)", t11);
 	run("return(int), arg(1)", t12);
+	run("return(void), arg(2)", t14);
+	run("return(int), arg(2)", t15);
 }
 
 } // unnamed
