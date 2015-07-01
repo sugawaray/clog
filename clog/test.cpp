@@ -178,7 +178,7 @@ public:
 	}
 protected:
 	void call_and_assert() {
-		call<decltype(clog::out(m, f))>();
+		call<typename clog::Outl<F>::result_type>();
 	}
 	void verify() {
 		t.a(Spy::last()->message == m, L);
@@ -189,11 +189,11 @@ protected:
 private:
 	template<class T>
 	void call(typename d::enable_void<T>::type* = 0) {
-		clog::out(m, f);
+		(clog::outl(m, f))();
 	}
 	template<class T>
 	void call(typename d::disable_void<T>::type* = 0) {
-		t.a(clog::out(m, f) == 1, L);
+		t.a((clog::outl(m, f))() == 1, L);
 	}
 };
 
@@ -238,7 +238,7 @@ protected:
 	using Test_ex<F>::m;
 
 	void call() {
-		clog::out(m, f);
+		(clog::outl(m, f))();
 	}
 };
 
@@ -254,7 +254,7 @@ protected:
 	using Test_ex<F>::m;
 
 	void call() {
-		clog::out(m, f, 1);
+		(clog::outl(m, f))(1);
 	}
 };
 
@@ -318,7 +318,7 @@ protected:
 	}
 
 	void call_and_assert() {
-		call<decltype(clog::out(m, f, nf::a.v1, nf::a.v2))>();
+		call<typename clog::Outl<F>::result_type>();
 	}
 
 	void verify() {
@@ -330,12 +330,12 @@ protected:
 private:
 	template<class T>
 	void call(typename d::enable_void<T>::type* = 0) {
-		clog::out(m, f, nf::a.v1, nf::a.v2);
+		(clog::outl(m, f))(nf::a.v1, nf::a.v2);
 	}
 
 	template<class T>
 	void call(typename d::disable_void<T>::type* = 0) {
-		t.a(clog::out(m, f, nf::a.v1, nf::a.v2) == 10, L);
+		t.a((clog::outl(m, f))(nf::a.v1, nf::a.v2) == 10, L);
 	}
 
 	F f;
@@ -353,7 +353,7 @@ protected:
 	using Test_1<F>::f;
 
 	void call_and_assert() {
-		call<decltype(clog::out(m, f, nf::a.v1))>();
+		call<typename clog::Outl<F>::result_type>();
 	}
 	void prepare_call() {
 		nf::a.v1 = 2;
@@ -362,12 +362,12 @@ protected:
 private:
 	template<class T>
 	void call(typename d::disable_void<T>::type* = 0) {
-		t.a(clog::out(m, f, nf::a.v1) == 1, L);
+		t.a((clog::outl(m, f))(nf::a.v1) == 1, L);
 	}
 
 	template<class T>
 	void call(typename d::enable_void<T>::type* = 0) {
-		clog::out(m, f, nf::a.v1);
+		(clog::outl(m, f))(nf::a.v1);
 	}
 };
 
@@ -406,17 +406,17 @@ protected:
 	using Test_1<F>::f;
 
 	void call_and_assert() {
-		call<decltype(clog::out(m, f, std::ref(nf::a)))>();
+		call<typename clog::Outl<F>::result_type>();
 	}
 private:
 	template<class T>
 	void call(typename d::disable_void<T>::type* = 0) {
-		t.a(clog::out(m, f, std::ref(nf::a)) == 1, L);
+		t.a((clog::outl(m, f))(nf::a) == 1, L);
 	}
 
 	template<class T>
 	void call(typename d::enable_void<T>::type* = 0) {
-		clog::out(m, f, std::ref(nf::a));
+		(clog::outl(m, f))(nf::a);
 	}
 };
 

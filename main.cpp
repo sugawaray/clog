@@ -34,15 +34,15 @@ void example()
 	impl::stream = &cout;
 	clog::outfn = impl::outimpl;
 	namespace n = clog;
-	if (n::out("fb0", fb0)) {
-		if (n::out("fi1", fi1, 0) == 0) {
-			if (n::out("fi1", fi1, 1) == 1) {
+	if ((n::outl("fb0", fb0))()) {
+		if ((n::outl("fi1", fi1))(0) == 0) {
+			if ((n::outl("fi1", fi1))(1) == 1) {
 				;
 			}
 		}
 	}
 	try {
-		n::out("fe", fe);
+		(n::outl("fe", fe))();
 	}
 	catch (const runtime_error& e) {
 		cout << "but it's expected." << endl;

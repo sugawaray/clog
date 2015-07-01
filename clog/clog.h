@@ -25,87 +25,123 @@ inline void outex(const char* m)
 	outfn(c);
 }
 
+template<class T>
+struct Arg {
+	static T convert(T a) {
+		return a;
+	}
+};
+
+template<class T>
+struct Arg<T&> {
+	static std::reference_wrapper<T> convert(T& a) {
+		return std::ref(a);
+	}
+};
+
+template<class T>
+struct Arg<const T&> {
+	static std::reference_wrapper<const T> convert(const T& a) {
+		return std::cref(a);
+	}
+};
+
+template<class R, class F>
+struct Outcall {
+	static R call(const char* m, F f) {
+		try {
+			R r(f());
+			outfn(Content(m));
+			return r;
+		}
+		catch (...) {
+			d::outex(m);
+			throw;
+		}
+	}
+};
+
+template<class F>
+struct Outcall<void, F> {
+	static void call(const char* m, F f) {
+		try {
+			f();
+			outfn(Content(m));
+		}
+		catch (...) {
+			d::outex(m);
+			throw;
+		}
+	}
+};
+
 } // d
 
 template<class F>
-inline void out_void(const char* m, F f)
-{
-	try {
-		f();
-		outfn(Content(m));
-	}
-	catch (...) {
-		d::outex(m);
-		throw;
-	}
-}
-
-template<class R, class F>
-inline R out(const char* m, F f)
-{
-	try {
-		R r(f());
-		outfn(Content(m));
-		return r;
-	}
-	catch (...) {
-		d::outex(m);
-		throw;
-	}
-}
+class Outl {
+};
 
 template<class R>
-inline R out(const char* m, R (f)())
-{
-	try {
-		R r(f());
-		outfn(Content(m));
-		return r;
+class Outl<R(*)()> {
+public:
+	typedef R result_type;
+
+	Outl(const char* m, R(*f)())
+		:	f(f), m(m) {
 	}
-	catch (...) {
-		d::outex(m);
-		throw;
+
+	R operator()() const {
+		return d::Outcall<R, R(*)()>::call(m, f);
 	}
-}
 
-inline void out(const char* m, void (f)())
-{
-	try {
-		f();
-		outfn(Content(m));
+private:
+	R (*f)();
+	const char* m;
+};
+
+template<class R, class T1>
+class Outl<R(*)(T1)> {
+public:
+	typedef R result_type;
+
+	Outl(const char* m, R (*f)(T1))
+		:	f(f), m(m) {
 	}
-	catch (...) {
-		d::outex(m);
-		throw;
+
+	R operator()(T1 a1) const {
+		auto bf(std::bind(f, d::Arg<T1>::convert(a1)));
+		return d::Outcall<R, decltype(bf)>::call(m, bf);
 	}
-}
+private:
+	typedef R (*F)(T1);
+	F f;
+	const char* m;
+};
 
-template<class T, class T1>
-inline void out(const char* m, void (f)(T), T1 a)
-{
-	auto bf(std::bind(f, a));
-	out_void(m, bf);
-}
+template<class R, class T1, class T2>
+class Outl<R(*)(T1,T2)> {
+public:
+	typedef R result_type;
 
-template<class T1, class T2, class T3, class T4>
-inline void out(const char* m, void (f)(T1, T2), T3 v1, T4 v2)
-{
-	auto bf(std::bind(f, v1, v2));
-	out_void(m, bf);
-}
+	Outl(const char* m, R (*f)(T1, T2))
+		:	f(f), m(m) {
+	}
 
-template<class R, class T, class T1>
-inline R out(const char* m, R (f)(T), T1 a)
-{
-	auto bf(std::bind(f, a));
-	return out<R>(m, bf);
-}
+	R operator()(T1 a1, T2 a2) const {
+		auto bf(std::bind(f, d::Arg<T1>::convert(a1),
+			d::Arg<T2>::convert(a2)));
+		return d::Outcall<R, decltype(bf)>::call(m, bf);
+	}
+private:
+	typedef R (*F)(T1, T2);
+	F f;
+	const char* m;
+};
 
-template<class R, class T1, class T2, class T3, class T4>
-inline R out(const char* m, R(f)(T1, T2), T3 v1, T4 v2)
+template<class T>
+inline Outl<T> outl(const char* m, T f)
 {
-	auto bf(std::bind(f, v1, v2));
-	return out<R>(m, bf);
+	return Outl<T>(m, f);
 }
 
 } // clog
