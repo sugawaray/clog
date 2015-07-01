@@ -406,17 +406,17 @@ protected:
 	using Test_1<F>::f;
 
 	void call_and_assert() {
-		call<decltype(clog::out(m, f, nf::a))>();
+		call<decltype(clog::out(m, f, std::ref(nf::a)))>();
 	}
 private:
 	template<class T>
 	void call(typename d::disable_void<T>::type* = 0) {
-		t.a(clog::out(m, f, nf::a) == 1, L);
+		t.a(clog::out(m, f, std::ref(nf::a)) == 1, L);
 	}
 
 	template<class T>
 	void call(typename d::enable_void<T>::type* = 0) {
-		clog::out(m, f, nf::a);
+		clog::out(m, f, std::ref(nf::a));
 	}
 };
 

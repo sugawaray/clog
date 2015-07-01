@@ -80,59 +80,31 @@ inline void out(const char* m, void (f)())
 	}
 }
 
-template<class T>
-inline void out(const char* m, void (f)(T), T a)
+template<class T, class T1>
+inline void out(const char* m, void (f)(T), T1 a)
 {
 	auto bf(std::bind(f, a));
 	out_void(m, bf);
 }
 
-template<class T1, class T2>
-inline void out(const char* m, void (f)(T1, T2), T1 v1, T2 v2)
+template<class T1, class T2, class T3, class T4>
+inline void out(const char* m, void (f)(T1, T2), T3 v1, T4 v2)
 {
 	auto bf(std::bind(f, v1, v2));
 	out_void(m, bf);
 }
 
-template<class R, class T>
-inline R out(const char* m, R (f)(T), T a)
+template<class R, class T, class T1>
+inline R out(const char* m, R (f)(T), T1 a)
 {
 	auto bf(std::bind(f, a));
 	return out<R>(m, bf);
 }
 
-template<class R, class T1, class T2>
-inline R out(const char* m, R(f)(T1, T2), T1 v1, T2 v2)
+template<class R, class T1, class T2, class T3, class T4>
+inline R out(const char* m, R(f)(T1, T2), T3 v1, T4 v2)
 {
 	auto bf(std::bind(f, v1, v2));
-	return out<R>(m, bf);
-}
-
-template<class T>
-inline void out(const char* m, void (f)(T&), T& a)
-{
-	auto bf(std::bind(f, std::ref(a)));
-	out_void(m, bf);
-}
-
-template<class R, class T>
-inline R out(const char* m, R(f)(T&), T& a)
-{
-	auto bf(std::bind(f, std::ref(a)));
-	return out<R>(m, bf);
-}
-
-template<class T>
-inline void out(const char* m, void (f)(const T&), const T& a)
-{
-	auto bf(std::bind(f, std::cref(a)));
-	out_void(m, bf);
-}
-
-template<class R, class T>
-inline R out(const char* m, R(f)(const T&), const T& a)
-{
-	auto bf(std::bind(f, std::cref(a)));
 	return out<R>(m, bf);
 }
 
