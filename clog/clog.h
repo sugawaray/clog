@@ -55,7 +55,7 @@ struct Outcall {
 			return r;
 		}
 		catch (...) {
-			d::outex(m);
+			outex(m);
 			throw;
 		}
 	}
@@ -69,13 +69,11 @@ struct Outcall<void, F> {
 			outfn(Content(m));
 		}
 		catch (...) {
-			d::outex(m);
+			outex(m);
 			throw;
 		}
 	}
 };
-
-} // d
 
 template<class F>
 class Outl {
@@ -91,7 +89,7 @@ public:
 	}
 
 	R operator()() const {
-		return d::Outcall<R, R(*)()>::call(m, f);
+		return Outcall<R, R(*)()>::call(m, f);
 	}
 
 private:
@@ -109,8 +107,8 @@ public:
 	}
 
 	R operator()(T1 a1) const {
-		auto bf(std::bind(f, d::Arg<T1>::convert(a1)));
-		return d::Outcall<R, decltype(bf)>::call(m, bf);
+		auto bf(std::bind(f, Arg<T1>::convert(a1)));
+		return Outcall<R, decltype(bf)>::call(m, bf);
 	}
 private:
 	typedef R (*F)(T1);
@@ -128,9 +126,9 @@ public:
 	}
 
 	R operator()(T1 a1, T2 a2) const {
-		auto bf(std::bind(f, d::Arg<T1>::convert(a1),
-			d::Arg<T2>::convert(a2)));
-		return d::Outcall<R, decltype(bf)>::call(m, bf);
+		auto bf(std::bind(f, Arg<T1>::convert(a1),
+			Arg<T2>::convert(a2)));
+		return Outcall<R, decltype(bf)>::call(m, bf);
 	}
 private:
 	typedef R (*F)(T1, T2);
@@ -138,11 +136,18 @@ private:
 	const char* m;
 };
 
+} // d
+
 template<class T>
-inline Outl<T> outl(const char* m, T f)
+inline d::Outl<T> out(const char* m, T f)
 {
-	return Outl<T>(m, f);
+	return d::Outl<T>(m, f);
 }
+
+template<class F>
+struct Out_result {
+	typedef typename d::Outl<F>::result_type type;
+};
 
 } // clog
 } // unnamed
