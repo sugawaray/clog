@@ -138,13 +138,6 @@ private:
 
 } // d
 
-#if 0
-template<class T>
-inline d::Outl<T> out(const char* m, T f)
-{
-	return d::Outl<T>(m, f);
-}
-#else
 namespace d {
 
 template<class T, class R>
@@ -193,7 +186,6 @@ inline typename d::Enable_if_mp<T, d::Cimpl<T> >::type
 {
 	return d::Cimpl<T>(m, mp);
 }
-#endif
 
 template<class F>
 struct Out_result {
