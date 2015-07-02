@@ -556,6 +556,39 @@ void t15(const char* ms)
 
 } // nlog
 
+namespace nlogm {
+
+class Sample {
+public:
+	Sample()
+		:	called(false) {
+	}
+
+	bool is_called() const {
+		return called;
+	}
+
+	void mv0() {
+		called = true;
+	}
+private:
+	bool called;
+};
+
+void t1(const char* ms)
+{
+	Test t(ms);
+	nlog::F f;
+	Spy::reset();
+	Sample sample;
+	const char* m("message");
+	(clog::out(m, &Sample::mv0))(sample);
+	t.a(Spy::last()->message == m, L);
+	t.a(sample.is_called(), L);
+}
+
+} // nlogm
+
 using nomagic::run;
 
 void spy_tests()
@@ -590,6 +623,13 @@ void log_tests()
 	run("return(int), arg(2)", t15);
 }
 
+void log_method_tests()
+{
+	using namespace nlogm;
+
+	run("method, return(void), arg(0)", t1);
+}
+
 } // unnamed
 
 #include "test.h"
@@ -600,6 +640,7 @@ void run_clog_tests()
 {
 	spy_tests();
 	log_tests();
+	log_method_tests();
 }
 
 } // test

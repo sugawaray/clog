@@ -27,6 +27,12 @@ void fe()
 	throw runtime_error("exception");
 }
 
+class Sample {
+public:
+	void mv0() {
+	}
+};
+
 void example()
 {
 	cout << "some examples start" << endl;
@@ -47,6 +53,8 @@ void example()
 	catch (const runtime_error& e) {
 		cout << "but it's expected." << endl;
 	}
+	Sample sample;
+	(n::out("Sample::mv0", &Sample::mv0))(sample);
 
 	cout << "examples end" << endl;
 }

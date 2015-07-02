@@ -138,11 +138,62 @@ private:
 
 } // d
 
+#if 0
 template<class T>
 inline d::Outl<T> out(const char* m, T f)
 {
 	return d::Outl<T>(m, f);
 }
+#else
+namespace d {
+
+template<class T, class R>
+struct Enable_if_not_mp :
+	std::enable_if<!std::is_member_pointer<T>::value, R> {
+};
+
+template<class T, class R>
+struct Enable_if_mp :
+	std::enable_if<std::is_member_pointer<T>::value, R> {
+};
+
+template<class T>
+class Cimpl {
+public:
+};
+
+template<class C, class R>
+class Cimpl<R(C::*)()> {
+public:
+	Cimpl(const char* m, R(C::*p)())
+		:	m(m), p(p) {
+	}
+
+	R operator()(C& o) const {
+		auto bf(std::bind(p, Arg<C&>::convert(o)));
+		return Outcall<R, decltype(bf)>::call(m, bf);
+	}
+private:
+	const char* m;
+	R (C::*p)();
+};
+
+} // d
+
+template<class T>
+inline typename d::Enable_if_not_mp<T, d::Outl<T> >::type
+	out(const char* m, T f)
+{
+	return d::Outl<T>(m, f);
+}
+
+template<class T>
+inline typename d::Enable_if_mp<T, d::Cimpl<T> >::type
+	out(const char* m, T mp)
+{
+	return d::Cimpl<T>(m, mp);
+}
+#endif
 
 template<class F>
 struct Out_result {
