@@ -33,6 +33,9 @@ public:
 	}
 };
 
+#define L0(m, f)	((n::out((m), (f)))())
+#define L1(m, f, a1)	((n::out((m), (f)))((a1)))
+#define LM0(m, p, o)	((n::out((m), (p)))((o)))
 void example()
 {
 	cout << "some examples start" << endl;
@@ -40,21 +43,21 @@ void example()
 	impl::stream = &cout;
 	clog::outfn = impl::outimpl;
 	namespace n = clog;
-	if ((n::out("fb0", fb0))()) {
-		if ((n::out("fi1", fi1))(0) == 0) {
-			if ((n::out("fi1", fi1))(1) == 1) {
+	if (L0("calling fb0 ...", fb0)) {
+		if (L1("calling fi1 ...", fi1, 0) == 0) {
+			if (L1("calling fi1 ...", fi1, 1) == 1) {
 				;
 			}
 		}
 	}
 	try {
-		(n::out("fe", fe))();
+		L0("calling fe which may throw an exception.", fe);
 	}
 	catch (const runtime_error& e) {
 		cout << "but it's expected." << endl;
 	}
 	Sample sample;
-	(n::out("Sample::mv0", &Sample::mv0))(sample);
+	LM0("calling a method of the Sample object.", &Sample::mv0, sample);
 
 	cout << "examples end" << endl;
 }
