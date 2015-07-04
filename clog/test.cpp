@@ -569,22 +569,111 @@ public:
 	}
 
 	void mv0() {
-		called = true;
+		receive_call();
+	}
+
+	void mv0c() const {
+		receive_call();
+	}
+
+	int mi0() {
+		receive_call();
+		return 1;
+	}
+
+	int mi0c() const {
+		receive_call();
+		return 1;
 	}
 private:
-	bool called;
+	void receive_call() const {
+		called = true;
+	}
+
+	mutable bool called;
+};
+
+class Test_0 : protected Test, private nlog::F {
+public:
+	Test_0(const char* ms)
+		:	Test(ms), m("message") {
+	}
+
+	void start() {
+		Spy::reset();
+		call_and_assert();
+		a(Spy::last()->message == m, L);
+		a(sample.is_called(), L);
+	}
+protected:
+	virtual void call_and_assert() = 0;
+
+	const char* m;
+	Sample sample;
+};
+
+class Test_v0 : public Test_0 {
+public:
+	Test_v0(const char* ms)
+		:	Test_0(ms) {
+	}
+protected:
+	void call_and_assert() {
+		(clog::out(m, &Sample::mv0))(sample);
+	}
+};
+
+class Test_v0c : public Test_0 {
+public:
+	Test_v0c(const char* ms)
+		:	Test_0(ms) {
+	}
+protected:
+	void call_and_assert() {
+		(clog::out(m, &Sample::mv0c))(sample);
+	}
+};
+
+class Test_i0 : public Test_0 {
+public:
+	Test_i0(const char* ms)
+		:	Test_0(ms) {
+	}
+protected:
+	void call_and_assert() {
+		a((clog::out(m, &Sample::mi0))(sample) == 1, L);
+	}
+};
+
+class Test_i0c : public Test_0 {
+public:
+	Test_i0c(const char* ms)
+		:	Test_0(ms) {
+	}
+protected:
+	void call_and_assert() {
+		a((clog::out(m, &Sample::mi0c))(sample) == 1, L);
+	}
 };
 
 void t1(const char* ms)
 {
-	Test t(ms);
-	nlog::F f;
-	Spy::reset();
-	Sample sample;
-	const char* m("message");
-	(clog::out(m, &Sample::mv0))(sample);
-	t.a(Spy::last()->message == m, L);
-	t.a(sample.is_called(), L);
+	(Test_v0(ms)).start();
+}
+
+void t2(const char* ms)
+{
+	(Test_i0(ms)).start();
+}
+
+void t3(const char* ms)
+{
+	(Test_v0c(ms)).start();
+}
+
+void t4(const char* ms)
+{
+	(Test_i0c(ms)).start();
 }
 
 } // nlogm
@@ -628,6 +717,9 @@ void log_method_tests()
 	using namespace nlogm;
 
 	run("method, return(void), arg(0)", t1);
+	run("method, return(int), arg(0)", t2);
+	run("method, return(void), arg(0), const", t3);
+	run("method, return(int), arg(0), const", t4);
 }
 
 } // unnamed
