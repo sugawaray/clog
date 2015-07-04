@@ -76,7 +76,7 @@ void t3(const char* ms)
 
 } // nspy
 
-namespace nlog {
+namespace nlogcmn {
 
 class F {
 public:
@@ -125,6 +125,14 @@ struct E {
 };
 
 } // nf
+
+} // nlogcmn
+
+namespace nlog {
+
+using nlogcmn::F;
+
+namespace nf = nlogcmn::nf;
 
 void f1()
 {
@@ -558,6 +566,9 @@ void t15(const char* ms)
 
 namespace nlogm {
 
+using nlogcmn::F;
+namespace nf = nlogcmn::nf;
+
 class Sample {
 public:
 	Sample()
@@ -576,9 +587,9 @@ public:
 		receive_call();
 	}
 
-	void mv1(nlog::nf::A& a) {
+	void mv1(nf::A& a) {
 		receive_call();
-		nlog::nf::arg = a;
+		nf::arg = a;
 	}
 
 	int mi0() {
@@ -598,7 +609,7 @@ private:
 	mutable bool called;
 };
 
-class Test_0 : protected Test, private nlog::F {
+class Test_0 : protected Test, private F {
 public:
 	Test_0(const char* ms)
 		:	Test(ms), m("message") {
@@ -606,7 +617,7 @@ public:
 
 	void start() {
 		Spy::reset();
-		nlog::nf::reset();
+		nf::reset();
 		call_and_assert();
 		a(Spy::last()->message == m, L);
 		a(sample.is_called(), L);
@@ -650,12 +661,12 @@ public:
 	}
 protected:
 	void call_and_assert() {
-		(clog::out(m, &Sample::mv1))(sample, nlog::nf::a);
+		(clog::out(m, &Sample::mv1))(sample, nf::a);
 	}
 
 	void verify() {
-		a(nlog::nf::arg.v1 == nlog::nf::a.v1, L);
-		a(!nlog::nf::A::copied, L);
+		a(nf::arg.v1 == nf::a.v1, L);
+		a(!nf::A::copied, L);
 	}
 };
 
