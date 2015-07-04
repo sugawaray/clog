@@ -576,6 +576,11 @@ public:
 		receive_call();
 	}
 
+	void mv1(nlog::nf::A& a) {
+		receive_call();
+		nlog::nf::arg = a;
+	}
+
 	int mi0() {
 		receive_call();
 		return 1;
@@ -601,12 +606,16 @@ public:
 
 	void start() {
 		Spy::reset();
+		nlog::nf::reset();
 		call_and_assert();
 		a(Spy::last()->message == m, L);
 		a(sample.is_called(), L);
+		verify();
 	}
 protected:
 	virtual void call_and_assert() = 0;
+	virtual void verify() {
+	}
 
 	const char* m;
 	Sample sample;
@@ -631,6 +640,22 @@ public:
 protected:
 	void call_and_assert() {
 		(clog::out(m, &Sample::mv0c))(sample);
+	}
+};
+
+class Test_v1 : public Test_0 {
+public:
+	Test_v1(const char* ms)
+		:	Test_0(ms) {
+	}
+protected:
+	void call_and_assert() {
+		(clog::out(m, &Sample::mv1))(sample, nlog::nf::a);
+	}
+
+	void verify() {
+		a(nlog::nf::arg.v1 == nlog::nf::a.v1, L);
+		a(!nlog::nf::A::copied, L);
 	}
 };
 
@@ -674,6 +699,11 @@ void t3(const char* ms)
 void t4(const char* ms)
 {
 	(Test_i0c(ms)).start();
+}
+
+void t5(const char* ms)
+{
+	(Test_v1(ms)).start();
 }
 
 } // nlogm
@@ -720,6 +750,7 @@ void log_method_tests()
 	run("method, return(int), arg(0)", t2);
 	run("method, return(void), arg(0), const", t3);
 	run("method, return(int), arg(0), const", t4);
+	run("method, return(void), arg(1)", t5);
 }
 
 } // unnamed

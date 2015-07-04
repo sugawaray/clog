@@ -187,6 +187,23 @@ private:
 	R (C::*p)() const;
 };
 
+template<class C, class R, class A1>
+class Cimpl<R(C::*)(A1)> {
+public:
+	Cimpl(const char* m, R(C::*p)(A1))
+		:	m(m), p(p) {
+	}
+
+	R operator()(C& o, A1 a1) const {
+		auto bf(std::bind(p, Arg<C&>::convert(o),
+			Arg<A1>::convert(a1)));
+		return Outcall<R, decltype(bf)>::call(m, bf);
+	}
+private:
+	const char* m;
+	R (C::*p)(A1);
+};
+
 } // d
 
 template<class T>
