@@ -592,6 +592,11 @@ public:
 		nf::arg = a;
 	}
 
+	void mv1c(nf::A& a) const {
+		receive_call();
+		nf::arg = a;
+	}
+
 	int mi0() {
 		receive_call();
 		return 1;
@@ -654,19 +659,37 @@ protected:
 	}
 };
 
-class Test_v1 : public Test_0 {
+class Test_1 : public Test_0 {
+public:
+	Test_1(const char* ms)
+		:	Test_0(ms) {
+	}
+protected:
+	void verify() {
+		a(nf::arg.v1 == nf::a.v1, L);
+		a(!nf::A::copied, L);
+	}
+};
+
+class Test_v1 : public Test_1 {
 public:
 	Test_v1(const char* ms)
-		:	Test_0(ms) {
+		:	Test_1(ms) {
 	}
 protected:
 	void call_and_assert() {
 		(clog::out(m, &Sample::mv1))(sample, nf::a);
 	}
+};
 
-	void verify() {
-		a(nf::arg.v1 == nf::a.v1, L);
-		a(!nf::A::copied, L);
+class Test_v1c : public Test_1 {
+public:
+	Test_v1c(const char* ms)
+		:	Test_1(ms) {
+	}
+protected:
+	void call_and_assert() {
+		(clog::out(m, &Sample::mv1c))(sample, nf::a);
 	}
 };
 
@@ -717,6 +740,11 @@ void t5(const char* ms)
 	(Test_v1(ms)).start();
 }
 
+void t6(const char* ms)
+{
+	(Test_v1c(ms)).start();
+}
+
 } // nlogm
 
 using nomagic::run;
@@ -762,6 +790,7 @@ void log_method_tests()
 	run("method, return(void), arg(0), const", t3);
 	run("method, return(int), arg(0), const", t4);
 	run("method, return(void), arg(1)", t5);
+	run("method, return(void), arg(1), const", t6);
 }
 
 } // unnamed
