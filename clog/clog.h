@@ -84,35 +84,16 @@ struct Outcall<void, F> {
 			outfn(Content(((*config_list)[i]).message));
 		}
 		catch (...) {
-			//outex(m);
+			outex(((*config_list)[i]).message);
 			throw;
 		}
 	}
 };
 
 template<class F>
-class Outl {
+class Simple_fimpl {
 };
 
-#if 0
-template<class R>
-class Outl<R(*)()> {
-public:
-	typedef R result_type;
-
-	Outl(const char* m, R(*f)())
-		:	f(f), m(m) {
-	}
-
-	R operator()() const {
-		return Outcall<R, R(*)()>::call(m, f);
-	}
-
-private:
-	R (*f)();
-	const char* m;
-};
-#else
 template<class T>
 class Fimpl {
 };
@@ -135,12 +116,12 @@ private:
 };
 
 template<class R>
-class Outl<R(*)()> : public Fimpl<Outl<R(*)()> > {
+class Simple_fimpl<R(*)()> : public Fimpl<Simple_fimpl<R(*)()> > {
 public:
 	typedef R result_type;
 
-	Outl(const char* m, R(*f)())
-		:	Fimpl<Outl<R(*)()> >(f), m(m) {
+	Simple_fimpl(const char* m, R(*f)())
+		:	Fimpl<Simple_fimpl<R(*)()> >(f), m(m) {
 	}
 
 	const char* get_id() const {
@@ -168,14 +149,13 @@ public:
 private:
 	int id;
 };
-#endif
 
 template<class R, class T1>
-class Outl<R(*)(T1)> {
+class Simple_fimpl<R(*)(T1)> {
 public:
 	typedef R result_type;
 
-	Outl(const char* m, R (*f)(T1))
+	Simple_fimpl(const char* m, R (*f)(T1))
 		:	f(f), m(m) {
 	}
 
@@ -190,11 +170,11 @@ private:
 };
 
 template<class R, class T1, class T2>
-class Outl<R(*)(T1,T2)> {
+class Simple_fimpl<R(*)(T1,T2)> {
 public:
 	typedef R result_type;
 
-	Outl(const char* m, R (*f)(T1, T2))
+	Simple_fimpl(const char* m, R (*f)(T1, T2))
 		:	f(f), m(m) {
 	}
 
@@ -297,10 +277,10 @@ private:
 } // d
 
 template<class T>
-inline typename d::Enable_if_not_mp<T, d::Outl<T> >::type
+inline typename d::Enable_if_not_mp<T, d::Simple_fimpl<T> >::type
 	out(const char* m, T f)
 {
-	return d::Outl<T>(m, f);
+	return d::Simple_fimpl<T>(m, f);
 }
 
 template<class T>
@@ -319,7 +299,7 @@ inline typename d::Enable_if_mp<T, d::Cimpl<T> >::type
 
 template<class F>
 struct Out_result {
-	typedef typename d::Outl<F>::result_type type;
+	typedef typename d::Simple_fimpl<F>::result_type type;
 };
 
 } // clog
