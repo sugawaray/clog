@@ -1,12 +1,15 @@
 #ifndef __UNNAMED_CLOG_CLOG_H__
 #define __UNNAMED_CLOG_CLOG_H__
 
+#include "config.h"
 #include "content.h"
 #include <functional>
 
 namespace {
 namespace clog {
 
+using clogcmn::Config;
+using clogcmn::Config_list;
 using clogcmn::Content;
 
 void outimpl(const Content&)
@@ -15,6 +18,8 @@ void outimpl(const Content&)
 
 typedef void (*Out)(const Content&);
 Out outfn(outimpl);
+
+Config_list* config_list(0);
 
 namespace d {
 
@@ -73,12 +78,23 @@ struct Outcall<void, F> {
 			throw;
 		}
 	}
+	static void call(int i, F f) {
+		try {
+			f();
+			outfn(Content(((*config_list)[i]).message));
+		}
+		catch (...) {
+			//outex(m);
+			throw;
+		}
+	}
 };
 
 template<class F>
 class Outl {
 };
 
+#if 0
 template<class R>
 class Outl<R(*)()> {
 public:
@@ -96,6 +112,63 @@ private:
 	R (*f)();
 	const char* m;
 };
+#else
+template<class T>
+class Fimpl {
+};
+
+template<template<class A> class Te, class R>
+class Fimpl<Te<R(*)()> > {
+public:
+	typedef R result_type;
+	typedef Te<R(*)()> derived;
+
+	Fimpl(R(*f)()) : f(f) {
+	}
+
+	R operator()() const {
+		return Outcall<R, R(*)()>::call(
+			static_cast<const derived*>(this)->get_id(), f);
+	}
+private:
+	R (*f)();
+};
+
+template<class R>
+class Outl<R(*)()> : public Fimpl<Outl<R(*)()> > {
+public:
+	typedef R result_type;
+
+	Outl(const char* m, R(*f)())
+		:	Fimpl<Outl<R(*)()> >(f), m(m) {
+	}
+
+	const char* get_id() const {
+		return m;
+	}
+
+private:
+	const char* m;
+};
+
+template<class F>
+class Extended_fimpl {
+};
+
+template<class R>
+class Extended_fimpl<R(*)()> : public Fimpl<Extended_fimpl<R(*)()> > {
+public:
+	Extended_fimpl(int id, R(*f)())
+		:	Fimpl<Extended_fimpl<R(*)()> >(f), id(id) {
+	}
+
+	int get_id() const {
+		return id;
+	}
+private:
+	int id;
+};
+#endif
 
 template<class R, class T1>
 class Outl<R(*)(T1)> {
@@ -228,6 +301,13 @@ inline typename d::Enable_if_not_mp<T, d::Outl<T> >::type
 	out(const char* m, T f)
 {
 	return d::Outl<T>(m, f);
+}
+
+template<class T>
+inline typename d::Enable_if_not_mp<T, d::Extended_fimpl<T> >::type
+	out(int id, T f)
+{
+	return d::Extended_fimpl<T>(id, f);
 }
 
 template<class T>

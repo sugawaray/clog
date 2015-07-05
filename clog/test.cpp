@@ -1,4 +1,5 @@
 #include <clog/clog.h>
+#include <clog/config.h>
 #include <nomagic.h>
 #include <functional>
 #include <stdexcept>
@@ -157,7 +158,7 @@ struct disable_void : enable_if<!is_void<T>::value> {
 class Test_common {
 public:
 	Test_common(const char* ms)
-		:	t(ms) {
+		:	t(ms), m("message") {
 	}
 
 	void operator()() {
@@ -203,6 +204,39 @@ private:
 	void call(typename d::disable_void<T>::type* = 0) {
 		t.a((clog::out(m, f))() == 1, L);
 	}
+};
+
+template<class F>
+class Test_extended_0 : public Test_0<F> {
+private:
+	using Test_0<F>::m;
+	using Test_0<F>::f;
+	using Test_0<F>::t;
+public:
+	Test_extended_0(F f, const char* ms)
+		:	Test_0<F>(f, ms) {
+		config_list = clogcmn::Config_list::create(configs);
+		clog::config_list = &config_list;
+		configs[0].message = m;
+		configs[0].measure_etime = false;
+	}
+protected:
+	void call_and_assert() {
+		call<typename clog::Out_result<F>::type>();
+	}
+
+private:
+	template<class T>
+	void call(typename d::enable_void<T>::type* = 0) {
+		(clog::out(0, f))();
+	}
+	template<class T>
+	void call(typename d::disable_void<T>::type* = 0) {
+		t.a((clog::out(0, f))() == 1, L);
+	}
+
+	clogcmn::Config_list config_list;
+	clogcmn::Config configs[1];
 };
 
 using std::logic_error;
@@ -284,10 +318,29 @@ inline Test_0<F> test_0(F f, const char* ms)
 	return Test_0<F>(f, ms);
 }
 
+template<class F>
+inline Test_extended_0<F> test_extended_0(F f, const char* ms)
+{
+	return Test_extended_0<F>(f, ms);
+}
+
+namespace nsimple {
+
 void t1(const char* ms)
 {
 	(test_0(f1, ms))();
 }
+
+} // nsimple
+
+namespace nextended {
+
+void t1(const char* ms)
+{
+	(test_extended_0(f1, ms))();
+}
+
+} // nextended
 
 void f2(int a)
 {
@@ -385,10 +438,14 @@ inline Test_1v<F> test_1v(F f, const char* ms)
 	return Test_1v<F>(f, ms);
 }
 
+namespace nsimple {
+
 void t2(const char* ms)
 {
 	(test_1v(f2, ms))();
 }
+
+} // nsimple
 
 void f3(nf::A& a)
 {
@@ -434,10 +491,14 @@ inline Test_1r<F> test_1r(F f, const char* ms)
 	return Test_1r<F>(f, ms);
 }
 
+namespace nsimple {
+
 void t3(const char* ms)
 {
 	(test_1r(f3, ms))();
 }
+
+} // nsimple
 
 int f1_1r(nf::A& a)
 {
@@ -452,6 +513,8 @@ int f1_1rc(const nf::A& a)
 	nf::arg = a;
 	return 1;
 }
+
+namespace nsimple {
 
 void t7(const char* ms)
 {
@@ -468,16 +531,22 @@ void t4(const char* ms)
 	(test_1r(f3c, ms))();
 }
 
+} // nsimple
+
 int f1_0()
 {
 	nf::called = true;
 	return 1;
 }
 
+namespace nsimple {
+
 void t5(const char* ms)
 {
 	(test_0(f1_0, ms))();
 }
+
+} // nsimple
 
 int f1_1(int v)
 {
@@ -486,30 +555,42 @@ int f1_1(int v)
 	return 1;
 }
 
+namespace nsimple {
+
 void t6(const char* ms)
 {
 	(test_1v(f1_1, ms))();
 }
+
+} // nsimple
 
 void f0e()
 {
 	throw nf::E();
 }
 
+namespace nsimple {
+
 void t9(const char* ms)
 {
 	(test_0_ex(f0e, ms))();
 }
+
+} // nsimple
 
 int f0ei()
 {
 	throw nf::E();
 }
 
+namespace nsimple {
+
 void t10(const char* ms)
 {
 	(test_0_ex(f0ei, ms))();
 }
+
+} // nsimple
 
 void f1e(int a)
 {
@@ -521,6 +602,8 @@ int f1ei(int a)
 	throw nf::E();
 }
 
+namespace nsimple {
+
 void t11(const char* ms)
 {
 	(test_1_ex(f1e, ms))();
@@ -530,6 +613,8 @@ void t12(const char* ms)
 {
 	(test_1_ex(f1ei, ms))();
 }
+
+} // nsimple
 
 template<class F>
 inline Test_2<F> test_2(F f, const char* ms)
@@ -544,10 +629,14 @@ void fv2(int v1, int v2)
 	nf::arg.v2 = v2;
 }
 
+namespace nsimple {
+
 void t14(const char* ms)
 {
 	(test_2(fv2, ms))();
 }
+
+} // nsimple
 
 int fi2(int v1, int v2)
 {
@@ -557,10 +646,14 @@ int fi2(int v1, int v2)
 	return 10;
 }
 
+namespace nsimple {
+
 void t15(const char* ms)
 {
 	(test_2(fi2, ms))();
 }
+
+} // nsimple
 
 } // nlog
 
@@ -763,7 +856,9 @@ void spy_tests()
 
 void log_tests()
 {
-	using namespace nlog;
+	std::cerr << "simple log tests" << std::endl;
+
+	using namespace nlog::nsimple;
 
 	run("return(void), arg(0)", t1);
 	run("return(void), arg(1)", t2);
@@ -779,6 +874,15 @@ void log_tests()
 	run("return(int), arg(1)", t12);
 	run("return(void), arg(2)", t14);
 	run("return(int), arg(2)", t15);
+}
+
+void log_extended_tests()
+{
+	std::cerr << "extended log tests" << std::endl;
+
+	using namespace nlog::nextended;
+
+	run("return(void), arg(0)", t1);
 }
 
 void log_method_tests()
@@ -803,6 +907,7 @@ void run_clog_tests()
 {
 	spy_tests();
 	log_tests();
+	log_extended_tests();
 	log_method_tests();
 }
 
