@@ -219,40 +219,6 @@ protected:
 	clogcmn::Config configs[1];
 };
 
-#if 0
-template<class F>
-class Test_extended_0 : public Test_0<F> {
-private:
-	using Test_0<F>::m;
-	using Test_0<F>::f;
-	using Test_0<F>::t;
-public:
-	Test_extended_0(F f, const char* ms)
-		:	Test_0<F>(f, ms) {
-		config_list = clogcmn::Config_list::create(configs);
-		clog::config_list = &config_list;
-		configs[0].message = m;
-		configs[0].measure_etime = false;
-	}
-protected:
-	void call_and_assert() {
-		call<typename clog::Out_result<F>::type>();
-	}
-
-private:
-	template<class T>
-	void call(typename d::enable_void<T>::type* = 0) {
-		(clog::out(0, f))();
-	}
-	template<class T>
-	void call(typename d::disable_void<T>::type* = 0) {
-		t.a((clog::out(0, f))() == 1, L);
-	}
-
-	clogcmn::Config_list config_list;
-	clogcmn::Config configs[1];
-};
-#else
 template<class F>
 class Test_extended_0 : public Test_0<F>, private Extended_impl {
 private:
@@ -278,7 +244,6 @@ private:
 		t.a((clog::out(0, f))() == 1, L);
 	}
 };
-#endif
 
 using std::logic_error;
 
