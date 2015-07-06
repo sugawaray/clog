@@ -1,5 +1,7 @@
 #include <clog/clog.h>
 #include <clog/test.h>
+#include <clog/test_ext.h>
+#include <clog/spy_test.h>
 #include "an_impl/outimpl.h"
 #include "an_impl/outimpl_test.h"
 #include <iostream>
@@ -67,7 +69,9 @@ void example()
 int main()
 {
 	cout << "test start" << endl;
+	test::run_clog_spy_tests();
 	test::run_clog_tests();
+	test::run_clog_extension_tests();
 	impl::test::run_outimpl_tests();
 	cout << "test end" << endl;
 
