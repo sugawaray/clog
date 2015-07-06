@@ -416,8 +416,19 @@ public:
 	}
 protected:
 	using Test_2<F>::f;
+	using Test_2<F>::t;
 
 	void call_and_assert() {
+		(clog::out(0, f))(nf::a.v1, nf::a.v2);
+	}
+private:
+	template<class T>
+	void call(typename d::disable_void<T>::type* = 0) {
+		t.a((clog::out(0, f))(nf::a.v1, nf::a.v2) == 1, L);
+	}
+
+	template<class T>
+	void call(typename d::enable_void<T>::type* = 0) {
 		(clog::out(0, f))(nf::a.v1, nf::a.v2);
 	}
 };
@@ -460,7 +471,18 @@ public:
 	}
 protected:
 	using Test_1v<F>::f;
+	using Test_1v<F>::t;
 	void call_and_assert() {
+		call<typename clog::Out_result<F>::type>();
+	}
+private:
+	template<class T>
+	void call(typename d::disable_void<T>::type* = 0) {
+		t.a((clog::out(0, f))(nf::a.v1) == 1, L);
+	}
+
+	template<class T>
+	void call(typename d::enable_void<T>::type* = 0) {
 		(clog::out(0, f))(nf::a.v1);
 	}
 };
