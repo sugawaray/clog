@@ -1,4 +1,5 @@
 #include "spy.h"
+#include "spy_fixture.h"
 #include <clog/clog.h>
 #include <clog/config.h>
 #include <nomagic.h>
@@ -19,12 +20,7 @@ using test::Spy;
 
 namespace nlogcmn {
 
-class F {
-public:
-	F() {
-		clog::outfn = Spy::out;
-	}
-};
+typedef Spy_fixture Fi;
 
 namespace nf {
 
@@ -71,7 +67,7 @@ struct E {
 
 namespace nlog {
 
-using nlogcmn::F;
+using nlogcmn::Fi;
 
 namespace nf = nlogcmn::nf;
 
@@ -102,7 +98,7 @@ public:
 	}
 
 	void operator()() {
-		F f;
+		Fi f;
 		m = "message";
 		nf::reset();
 		prepare_call();
@@ -702,7 +698,7 @@ void t15(const char* ms)
 
 namespace nlogm {
 
-using nlogcmn::F;
+using nlogcmn::Fi;
 namespace nf = nlogcmn::nf;
 
 class Sample {
@@ -750,7 +746,7 @@ private:
 	mutable bool called;
 };
 
-class Test_0 : protected Test, private F {
+class Test_0 : protected Test, private Fi {
 public:
 	Test_0(const char* ms)
 		:	Test(ms), m("message") {

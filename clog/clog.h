@@ -67,11 +67,13 @@ struct Outcall {
 	static R call(int i, F f) {
 		try {
 			R r(f());
-			outfn(Content(((*config_list)[i]).message));
+			if (config_list != 0)
+				outfn(Content(((*config_list)[i]).message));
 			return r;
 		}
 		catch (...) {
-			outex(((*config_list)[i]).message);
+			if (config_list != 0)
+				outex(((*config_list)[i]).message);
 			throw;
 		}
 	}
@@ -92,10 +94,12 @@ struct Outcall<void, F> {
 	static void call(int i, F f) {
 		try {
 			f();
-			outfn(Content(((*config_list)[i]).message));
+			if (config_list != 0)
+				outfn(Content(((*config_list)[i]).message));
 		}
 		catch (...) {
-			outex(((*config_list)[i]).message);
+			if (config_list != 0)
+				outex(((*config_list)[i]).message);
 			throw;
 		}
 	}
