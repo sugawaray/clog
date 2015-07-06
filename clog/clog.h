@@ -209,24 +209,56 @@ private:
 	int id;
 };
 
-template<class R, class T1, class T2>
-class Simple_fimpl<R(*)(T1,T2)> {
+template<template<class A> class Te, class R, class T1, class T2>
+class Fimpl<Te<R(*)(T1,T2)> > {
 public:
 	typedef R result_type;
+	typedef Te<R(*)(T1,T2)> derived;
 
-	Simple_fimpl(const char* m, R (*f)(T1, T2))
-		:	f(f), m(m) {
+	Fimpl(R (*f)(T1, T2))
+		:	f(f) {
 	}
 
 	R operator()(T1 a1, T2 a2) const {
 		auto bf(std::bind(f, Arg<T1>::convert(a1),
 			Arg<T2>::convert(a2)));
-		return Outcall<R, decltype(bf)>::call(m, bf);
+		return Outcall<R, decltype(bf)>::call(
+			static_cast<const derived*>(this)->get_id(), bf);
 	}
 private:
 	typedef R (*F)(T1, T2);
 	F f;
+};
+
+template<class R, class T1, class T2>
+class Simple_fimpl<R(*)(T1,T2)> : public Fimpl<Simple_fimpl<R(*)(T1,T2)> > {
+public:
+	typedef R result_type;
+
+	Simple_fimpl(const char* m, R (*f)(T1, T2))
+		:	Fimpl<Simple_fimpl<R(*)(T1,T2)> >(f), m(m) {
+	}
+
+	const char* get_id() const {
+		return m;
+	}
+private:
 	const char* m;
+};
+
+template<class R, class T1, class T2>
+class Extended_fimpl<R(*)(T1,T2)> :
+	public Fimpl<Extended_fimpl<R(*)(T1,T2)> > {
+public:
+	Extended_fimpl(int id, R(*f)(T1,T2))
+		:	Fimpl<Extended_fimpl<R(*)(T1,T2)> >(f), id(id) {
+	}
+
+	int get_id() const {
+		return id;
+	}
+private:
+	int id;
 };
 
 } // d

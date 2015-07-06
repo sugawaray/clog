@@ -394,6 +394,7 @@ protected:
 		t.a(nf::arg.v1 == nf::a.v1, L);
 		t.a(nf::arg.v2 == nf::a.v2, L);
 	}
+	F f;
 private:
 	template<class T>
 	void call(typename d::enable_void<T>::type* = 0) {
@@ -405,7 +406,20 @@ private:
 		t.a((clog::out(m, f))(nf::a.v1, nf::a.v2) == 10, L);
 	}
 
-	F f;
+};
+
+template<class F>
+class Test_extended_2 : public Test_2<F>, private Extended_impl {
+public:
+	Test_extended_2(F f, const char* ms)
+		:	Test_2<F>(f, ms) {
+	}
+protected:
+	using Test_2<F>::f;
+
+	void call_and_assert() {
+		(clog::out(0, f))(nf::a.v1, nf::a.v2);
+	}
 };
 
 template<class F>
@@ -674,6 +688,12 @@ inline Test_2<F> test_2(F f, const char* ms)
 	return Test_2<F>(f, ms);
 }
 
+template<class F>
+inline Test_extended_2<F> test_extended_2(F f, const char* ms)
+{
+	return Test_extended_2<F>(f, ms);
+}
+
 void fv2(int v1, int v2)
 {
 	nf::called = true;
@@ -689,6 +709,15 @@ void t14(const char* ms)
 }
 
 } // nsimple
+
+namespace nextended {
+
+void t14(const char* ms)
+{
+	(test_extended_2(fv2, ms))();
+}
+
+} // nextended
 
 int fi2(int v1, int v2)
 {
@@ -938,6 +967,7 @@ void log_extended_tests()
 	run("return(void), arg(1)", t2);
 	run("return(int), arg(0)", t5);
 	run("return(int), arg(1)", t6);
+	run("return(void), arg(2)", t14);
 }
 
 void log_method_tests()
