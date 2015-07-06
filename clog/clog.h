@@ -64,6 +64,17 @@ struct Outcall {
 			throw;
 		}
 	}
+	static R call(int i, F f) {
+		try {
+			R r(f());
+			outfn(Content(((*config_list)[i]).message));
+			return r;
+		}
+		catch (...) {
+			outex(((*config_list)[i]).message);
+			throw;
+		}
+	}
 };
 
 template<class F>
@@ -150,23 +161,52 @@ private:
 	int id;
 };
 
-template<class R, class T1>
-class Simple_fimpl<R(*)(T1)> {
+template<template<class A> class Te, class R, class T1>
+class Fimpl<Te<R(*)(T1)> > {
 public:
 	typedef R result_type;
+	typedef Te<R(*)(T1)> derived;
 
-	Simple_fimpl(const char* m, R (*f)(T1))
-		:	f(f), m(m) {
+	Fimpl(R (*f)(T1))
+		:	f(f) {
 	}
 
 	R operator()(T1 a1) const {
 		auto bf(std::bind(f, Arg<T1>::convert(a1)));
-		return Outcall<R, decltype(bf)>::call(m, bf);
+		return Outcall<R, decltype(bf)>::call(
+			static_cast<const derived*>(this)->get_id(), bf);
 	}
 private:
 	typedef R (*F)(T1);
 	F f;
+};
+
+template<class R, class T1>
+class Simple_fimpl<R(*)(T1)> : public Fimpl<Simple_fimpl<R(*)(T1)> > {
+public:
+	Simple_fimpl(const char* m, R (*f)(T1))
+		:	Fimpl<Simple_fimpl<R(*)(T1)> >(f), m(m) {
+	}
+
+	const char* get_id() const {
+		return m;
+	}
+private:
 	const char* m;
+};
+
+template<class R, class T1>
+class Extended_fimpl<R(*)(T1)> : public Fimpl<Extended_fimpl<R(*)(T1)> > {
+public:
+	Extended_fimpl(int id, R(*f)(T1))
+		:	Fimpl<Extended_fimpl<R(*)(T1)> >(f), id(id) {
+	}
+
+	int get_id() const {
+		return id;
+	}
+private:
+	int id;
 };
 
 template<class R, class T1, class T2>
