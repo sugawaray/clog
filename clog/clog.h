@@ -3,6 +3,7 @@
 
 #include "config.h"
 #include "content.h"
+#include "time.h"
 #include <functional>
 
 namespace {
@@ -51,6 +52,11 @@ struct Arg<const T&> {
 	}
 };
 
+inline const clogcmn::Config& config_at(int i)
+{
+	return (*config_list)[i];
+}
+
 template<class R, class F>
 struct Outcall {
 	static R call(const char* m, F f) {
@@ -92,10 +98,21 @@ struct Outcall<void, F> {
 		}
 	}
 	static void call(int i, F f) {
+		using clogcmn::Elapsed_time;
+		Content c;
+		Elapsed_time time;
+		if (config_list != 0 && config_at(i).measure_etime) {
+			c.elapsed_time_valid = true;
+			time.start();
+		}
 		try {
 			f();
-			if (config_list != 0)
-				outfn(Content(((*config_list)[i]).message));
+			if (config_list != 0) {
+				if (config_at(i).measure_etime)
+					c.elapsed_clocks = time.now();
+				c.message = config_at(i).message;
+				outfn(c);
+			}
 		}
 		catch (...) {
 			if (config_list != 0)

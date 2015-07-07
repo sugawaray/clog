@@ -22,12 +22,6 @@ public:
 	Config_list() : list(0) {
 	}
 
-/*
-	std::size_t size() const {
-		return 0;
-	}
-*/
-
 	const Config& operator[](std::size_t index) const {
 		return list[index];
 	}
