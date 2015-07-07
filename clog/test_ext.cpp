@@ -74,34 +74,64 @@ private:
 	Config_list list;
 };
 
-void t2(const char* ms)
-{
-	Test t(ms);
-	Spy_fixture f;
-	Config_list_fixture<1> cf;
-	cf.get_configs()[0].message = "message";
-	cf.get_configs()[0].measure_etime = false;
-	(out(0, fsuccess_v))();
-	t.a(!Spy::last()->has_elapsed_time(), L);
-}
-
 std::clock_t zero_one()
 {
 	static int r(0);
 	return r++ % 2;
 }
 
-void t3(const char* ms)
+class Fixture : private Spy_fixture, private Config_list_fixture<1> {
+public:
+	Fixture() {
+		get_configs()[0].message = "message";
+		get_configs()[0].measure_etime = false;
+		clogcmn::Elapsed_time::clockfn = zero_one;
+	}
+
+	void require_measure_etime(bool value) {
+		get_configs()[0].measure_etime = value;
+	}
+};
+
+template<class F>
+void case_do_not_require_measuring_time(const char* ms, F fn)
 {
 	Test t(ms);
-	Spy_fixture f;
-	Config_list_fixture<1> cf;
-	cf.get_configs()[0].message = "message";
-	cf.get_configs()[0].measure_etime = true;
-	(out(0, fsuccess_v))();
-	clogcmn::Elapsed_time::clockfn = zero_one;
+	Fixture f;
+	f.require_measure_etime(false);
+	(out(0, fn))();
+	t.a(!Spy::last()->has_elapsed_time(), L);
+}
+
+void t2(const char* ms)
+{
+	case_do_not_require_measuring_time(ms, fsuccess_v);
+}
+
+void t3(const char* ms)
+{
+	case_do_not_require_measuring_time(ms, fsuccess_i);
+}
+
+template<class F>
+void case_require_measuring_time(const char* ms, F fn)
+{
+	Test t(ms);
+	Fixture f;
+	f.require_measure_etime(true);
+	(out(0, fn))();
 	t.a(Spy::last()->has_elapsed_time(), L);
 	t.a(Spy::last()->elapsed_clocks == 1, L);
+}
+
+void t4(const char* ms)
+{
+	case_require_measuring_time(ms, fsuccess_v);
+}
+
+void t5(const char* ms)
+{
+	case_require_measuring_time(ms, fsuccess_i);
 }
 
 } // unnamed
@@ -112,9 +142,17 @@ void run_clog_extension_tests()
 
 	run("It does not cause errors when config_list is 0.", t1);
 
-	run("It does not measure elapsed time if its flag is not set.", t2);
+	run(	"It does not measure elapsed time if its flag is not set "
+		"when return type is void.", t2);
 
-	run("It measures elapsed time if its flag is set.", t3);
+	run(	"It does not measure elapsed time if its flag is not set "
+		"when return type is not void.", t3);
+
+	run(	"It measures elapsed time if its flag is set "
+		"when return type is void.", t4);
+
+	run(	"It measures elapsed time if its flag is set "
+		"when return type is not void.", t5);
 }
 
 } // test

@@ -71,10 +71,21 @@ struct Outcall {
 		}
 	}
 	static R call(int i, F f) {
+		using clogcmn::Elapsed_time;
+		Content c;
+		Elapsed_time time;
+		if (config_list != 0 && config_at(i).measure_etime) {
+			c.elapsed_time_valid = true;
+			time.start();
+		}
 		try {
 			R r(f());
-			if (config_list != 0)
-				outfn(Content(((*config_list)[i]).message));
+			if (config_list != 0) {
+				if (config_at(i).measure_etime)
+					c.elapsed_clocks = time.now();
+				c.message = config_at(i).message;
+				outfn(c);
+			}
 			return r;
 		}
 		catch (...) {
