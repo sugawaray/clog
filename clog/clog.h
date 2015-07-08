@@ -32,6 +32,17 @@ inline void outex(const char* m)
 	outfn(c);
 }
 
+using std::enable_if;
+using std::is_void;
+
+template<class T>
+struct Enable_if_void : enable_if<is_void<T>::value, T> {
+};
+
+template<class T>
+struct Disable_if_void : enable_if<!is_void<T>::value, T> {
+};
+
 template<class T>
 struct Arg {
 	static T convert(T a) {
@@ -39,17 +50,21 @@ struct Arg {
 	}
 };
 
+using std::cref;
+using std::ref;
+using std::reference_wrapper;
+
 template<class T>
 struct Arg<T&> {
-	static std::reference_wrapper<T> convert(T& a) {
-		return std::ref(a);
+	static reference_wrapper<T> convert(T& a) {
+		return ref(a);
 	}
 };
 
 template<class T>
 struct Arg<const T&> {
-	static std::reference_wrapper<const T> convert(const T& a) {
-		return std::cref(a);
+	static reference_wrapper<const T> convert(const T& a) {
+		return cref(a);
 	}
 };
 
@@ -91,8 +106,7 @@ public:
 	}
 private:
 	template<class T>
-	typename std::enable_if<std::is_void<T>::value>::type
-		runimpl(int i, F f) {
+	typename Enable_if_void<T>::type runimpl(int i, F f) {
 		prefunc(i);
 		try {
 			f();
@@ -106,8 +120,7 @@ private:
 	}
 
 	template<class T>
-	typename std::enable_if<!std::is_void<T>::value, R>::type
-		runimpl(int i, F f) {
+	typename Disable_if_void<T>::type runimpl(int i, F f) {
 		prefunc(i);
 		try {
 			R r(f());
@@ -238,6 +251,8 @@ private:
 	int id;
 };
 
+using std::bind;
+
 template<template<class A> class Te, class R, class T1>
 class Fimpl<Te<R(*)(T1)> > {
 public:
@@ -249,7 +264,7 @@ public:
 	}
 
 	R operator()(T1 a1) const {
-		auto bf(std::bind(f, Arg<T1>::convert(a1)));
+		auto bf(bind(f, Arg<T1>::convert(a1)));
 		return Outcall<R, decltype(bf)>::call(
 			static_cast<const derived*>(this)->get_id(), bf);
 	}
@@ -297,7 +312,7 @@ public:
 	}
 
 	R operator()(T1 a1, T2 a2) const {
-		auto bf(std::bind(f, Arg<T1>::convert(a1),
+		auto bf(bind(f, Arg<T1>::convert(a1),
 			Arg<T2>::convert(a2)));
 		return Outcall<R, decltype(bf)>::call(
 			static_cast<const derived*>(this)->get_id(), bf);
@@ -342,14 +357,15 @@ private:
 
 namespace d {
 
+using std::enable_if;
+using std::is_member_pointer;
+
 template<class T, class R>
-struct Enable_if_not_mp :
-	std::enable_if<!std::is_member_pointer<T>::value, R> {
+struct Enable_if_not_mp : enable_if<!is_member_pointer<T>::value, R> {
 };
 
 template<class T, class R>
-struct Enable_if_mp :
-	std::enable_if<std::is_member_pointer<T>::value, R> {
+struct Enable_if_mp : enable_if<is_member_pointer<T>::value, R> {
 };
 
 template<class T>
@@ -365,7 +381,7 @@ public:
 	}
 
 	R operator()(C& o) const {
-		auto bf(std::bind(p, Arg<C&>::convert(o)));
+		auto bf(bind(p, Arg<C&>::convert(o)));
 		return Outcall<R, decltype(bf)>::call(m, bf);
 	}
 private:
@@ -381,7 +397,7 @@ public:
 	}
 
 	R operator()(const C& o) const {
-		auto bf(std::bind(p, Arg<const C&>::convert(o)));
+		auto bf(bind(p, Arg<const C&>::convert(o)));
 		return Outcall<R, decltype(bf)>::call(m, bf);
 	}
 private:
@@ -397,7 +413,7 @@ public:
 	}
 
 	R operator()(C& o, A1 a1) const {
-		auto bf(std::bind(p, Arg<C&>::convert(o),
+		auto bf(bind(p, Arg<C&>::convert(o),
 			Arg<A1>::convert(a1)));
 		return Outcall<R, decltype(bf)>::call(m, bf);
 	}
@@ -414,7 +430,7 @@ public:
 	}
 
 	R operator()(C& o, A1 a1) const {
-		auto bf(std::bind(p, Arg<const C&>::convert(o),
+		auto bf(bind(p, Arg<const C&>::convert(o),
 			Arg<A1>::convert(a1)));
 		return Outcall<R, decltype(bf)>::call(m, bf);
 	}
