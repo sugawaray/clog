@@ -8,11 +8,13 @@ namespace clogcmn {
 
 class Elapsed_time {
 public:
+	Elapsed_time();
 	void start();
-	std::size_t now() const;
+	bool now(std::size_t* buffer) const;
 	static std::clock_t (*clockfn)();
 private:
 	std::clock_t c;
+	bool init_done;
 };
 
 } // clogcmn

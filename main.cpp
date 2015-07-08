@@ -2,6 +2,7 @@
 #include <clog/test.h>
 #include <clog/test_ext.h>
 #include <clog/spy_test.h>
+#include <clog/time_test.h>
 #include "an_impl/outimpl.h"
 #include "an_impl/outimpl_test.h"
 #include <iostream>
@@ -72,6 +73,7 @@ int main()
 	test::run_clog_spy_tests();
 	test::run_clog_tests();
 	test::run_clog_extension_tests();
+	clogcmn::test::run_elapsed_time_tests();
 	impl::test::run_outimpl_tests();
 	cout << "test end" << endl;
 

@@ -82,7 +82,7 @@ struct Outcall {
 			R r(f());
 			if (config_list != 0) {
 				if (config_at(i).measure_etime)
-					c.elapsed_clocks = time.now();
+					time.now(&c.elapsed_clocks);
 				c.message = config_at(i).message;
 				outfn(c);
 			}
@@ -120,7 +120,7 @@ struct Outcall<void, F> {
 			f();
 			if (config_list != 0) {
 				if (config_at(i).measure_etime)
-					c.elapsed_clocks = time.now();
+					time.now(&c.elapsed_clocks);
 				c.message = config_at(i).message;
 				outfn(c);
 			}
