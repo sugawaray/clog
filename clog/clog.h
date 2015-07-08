@@ -62,44 +62,41 @@ template<class R, class F>
 struct Implbuf;
 
 template<class R, class F>
-struct Implbase {
-	virtual ~Implbase() throw() {
-	}
-
-	virtual R run(int i, F f) = 0;
-};
-
-template<class T>
-struct Impl_type {
-};
-template<template<class A, class B> class Te, class R, class F>
-struct Impl_type<Te<R, F> > {
-	typedef R result_type;
-	typedef F func_type;
-};
-
-template<class D>
-class Impl :
-	public Implbase<typename Impl_type<D>::result_type,
-		typename Impl_type<D>::func_type> {
+class Impl {
 public:
-	typedef D derived;
-	typedef typename Impl_type<D>::result_type result_type;
-	typedef typename Impl_type<D>::func_type func_type;
-
-	result_type run(int i, func_type f) {
-		return runimpl<result_type>(i, f);
+	Impl(Implbuf<R, F>* buf)
+		:	b(buf) {
 	}
 
+	R run(int i, F f) {
+		return runimpl<R>(i, f);
+	}
+
+	void prefunc(int i) {
+		if (config_list == 0)
+			return;
+		if (config_at(i).measure_etime) {
+			b->c.elapsed_time_valid = true;
+			b->time.start();
+		}
+	}
+
+	void postfunc(int i) {
+		if (config_list == 0)
+			return;
+		if (config_at(i).measure_etime)
+			b->time.now(&b->c.elapsed_clocks);
+		b->c.message = config_at(i).message;
+		outfn(b->c);
+	}
 private:
 	template<class T>
 	typename std::enable_if<std::is_void<T>::value>::type
-		runimpl(int i, func_type f) {
-		derived* p(static_cast<derived*>(this));
-		p->prefunc(i);
+		runimpl(int i, F f) {
+		prefunc(i);
 		try {
 			f();
-			p->postfunc(i);
+			postfunc(i);
 		}
 		catch (...) {
 			if (config_list != 0)
@@ -109,14 +106,12 @@ private:
 	}
 
 	template<class T>
-	typename std::enable_if<
-		!std::is_void<T>::value, result_type>::type
-		runimpl(int i, func_type f) {
-		derived* p(static_cast<derived*>(this));
-		p->prefunc(i);
+	typename std::enable_if<!std::is_void<T>::value, R>::type
+		runimpl(int i, F f) {
+		prefunc(i);
 		try {
-			result_type r(f());
-			p->postfunc(i);
+			R r(f());
+			postfunc(i);
 			return r;
 		}
 		catch (...) {
@@ -125,48 +120,7 @@ private:
 			throw;
 		}
 	}
-};
 
-template<class R, class F>
-class Impl_without_list : public Impl<Impl_without_list<R, F> > {
-public:
-	typedef R result_type;
-	typedef F func_type;
-
-	Impl_without_list(Implbuf<R, F>*) {
-	}
-
-	void prefunc(int i) {
-	}
-
-	void postfunc(int i) {
-	}
-};
-
-template<class R, class F>
-class Impl_basic : public Impl<Impl_basic<R, F> > {
-public:
-	typedef R result_type;
-	typedef F func_type;
-
-	Impl_basic(Implbuf<R, F>* buf)
-		:	b(buf) {
-	}
-
-	void prefunc(int i) {
-		if (config_at(i).measure_etime) {
-			b->c.elapsed_time_valid = true;
-			b->time.start();
-		}
-	}
-
-	void postfunc(int i) {
-		if (config_at(i).measure_etime)
-			b->time.now(&b->c.elapsed_clocks);
-		b->c.message = config_at(i).message;
-		outfn(b->c);
-	}
-private:
 	Implbuf<R, F>* b;
 };
 
@@ -176,20 +130,15 @@ public:
 	Content c;
 	Elapsed_time time;
 
-	Implbase<R, F>* get_impl() {
-		if (config_list == 0)
-			return &impl_without_list;
-		else
-			return &impl_basic;
+	Impl<R, F>* get_impl() {
+		return &impl;
 	}
 
 	Implbuf()
-		:	impl_without_list(this),
-			impl_basic(this) {
+		:	impl(this) {
 	}
 private:
-	Impl_without_list<R, F> impl_without_list;
-	Impl_basic<R, F> impl_basic;
+	Impl<R, F> impl;
 };
 
 template<class R, class F>
