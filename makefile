@@ -7,7 +7,7 @@ RM = /bin/rm
 CC = gcc
 LD = gcc
 CFLAGS = -Wall -std=c++0x -pedantic $(INCPATH)
-LDFLAGS = -lstdc++
+LDFLAGS = -lstdc++ -lm
 ROOTDIR = $$($(PWD))
 INCPATH = -I$(ROOTDIR) -I$(ROOTDIR)/otherlibs
 

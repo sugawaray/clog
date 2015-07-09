@@ -11,28 +11,28 @@ namespace clogcmn {
 namespace test {
 namespace {
 
-using std::size_t;
 using nomagic::Test;
 
-clock_t clock_now;
+timespec time_now;
 
-clock_t return_fixed_value()
+int return_fixed_time(clockid_t id, timespec* p)
 {
-	return clock_now;
+	*p = time_now;
+	return 0;
 }
 
 class Fixture : public Test {
 public:
 	Fixture(const char* ms)
 		:	Test(ms) {
-		Elapsed_time::clockfn = return_fixed_value;
+		Elapsed_time::clock_gettimefn = return_fixed_time;
 	}
 };
 
 void t1(const char* ms)
 {
 	Fixture t(ms);
-	size_t r;
+	long r;
 	t.a(Elapsed_time().now(&r) == false, L);
 }
 
@@ -48,25 +48,31 @@ void t3(const char* ms)
 {
 	Fixture t(ms);
 	Elapsed_time et;
-	clock_now = 1;
+	time_now.tv_sec = 1;
+	time_now.tv_nsec = 2;
 	et.start();
-	clock_now = 3;
-	size_t r;
+	time_now.tv_sec = 3;
+	time_now.tv_nsec = 4;
+	long r;
 	t.a(et.now(&r), L);
-	t.a(r == 2, L);
+	t.a(r == 2000002, L);
 }
 
 void t4(const char* ms)
 {
 	Fixture t(ms);
 	Elapsed_time et;
-	clock_now = 1;
+	time_now.tv_sec = 1;
+	time_now.tv_nsec = 2;
 	et.start();
-	clock_now = 2;
+	time_now.tv_sec = 3;
+	time_now.tv_nsec = 4;
 	et.start();
-	clock_now = 3;
-	size_t r;
-	t.a(et.now(&r) == 1, L);
+	time_now.tv_sec = 5;
+	time_now.tv_nsec = 6;
+	long r;
+	t.a(et.now(&r), L);
+	t.a(r == 2000002, L);
 }
 
 } // unnamed
@@ -81,7 +87,7 @@ void run_elapsed_time_tests()
 
 	run("now returns false when a result address is not specified.", t2);
 
-	run("now returns clock counts.", t3);
+	run("now returns elapsed duration in nano seconds.", t3);
 
 	run("start() sets the start point of a duration.", t4);
 }

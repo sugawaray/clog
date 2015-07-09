@@ -3,6 +3,7 @@
 #include <clog/content.h>
 #include <utils.h>
 #include <nomagic.h>
+#include <cstdlib>
 #include <iostream>
 #include <sstream>
 
@@ -48,6 +49,23 @@ void t3(const char* ms)
 	t.a(to_string(c) == "message(an exception is thrown)", L);
 }
 
+void t4(const char* ms)
+{
+	using std::string;
+	Test t(ms);
+	Content c;
+	c.message = "message";
+	c.elapsed_time = 1000000000;
+	c.elapsed_time_valid = true;
+
+	string r(to_string(c));
+	t.a(r.find("message(duration:") == 0, L);
+	r = r.substr(string::traits_type::length("message(duration:"));
+	double d(std::strtod(r.c_str(), 0));
+	t.a(fabs(d - 1000) < 0.0000001, L);
+	t.a(r.substr(r.find_first_not_of("0123456789.")) == ")", L);
+}
+
 } // unnamed
 
 void run_outimpl_tests()
@@ -60,6 +78,8 @@ void run_outimpl_tests()
 
 	run(	"to_string : It outputs correctly "
 		"when an exception is thrown.", t3);
+
+	run("It outputs duration if there is a duration.", t4);
 }
 
 } // test

@@ -6,13 +6,12 @@
 
 namespace clogcmn {
 
-using std::size_t;
 using std::string;
 
 struct Content {
 	string message;
 	bool exception;
-	size_t elapsed_clocks;
+	long elapsed_time;
 
 	bool elapsed_time_valid;
 
@@ -22,12 +21,14 @@ struct Content {
 
 	Content()
 		:	exception(false),
+			elapsed_time(0),
 			elapsed_time_valid(false) {
 	}
 
 	Content(const string& message)
 		:	message(message),
 			exception(false),
+			elapsed_time(0),
 			elapsed_time_valid(false) {
 	}
 };

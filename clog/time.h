@@ -10,10 +10,11 @@ class Elapsed_time {
 public:
 	Elapsed_time();
 	void start();
-	bool now(std::size_t* buffer) const;
-	static std::clock_t (*clockfn)();
+	bool now(long* buffer) const;
+	static int (*clock_gettimefn)(clockid_t, struct timespec*);
 private:
-	std::clock_t c;
+	static long nanos(const timespec& ts);
+	timespec t;
 	bool init_done;
 };
 

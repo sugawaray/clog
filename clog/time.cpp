@@ -2,24 +2,32 @@
 
 namespace clogcmn {
 
-std::clock_t (*Elapsed_time::clockfn)()(std::clock);
+int (*Elapsed_time::clock_gettimefn)(clockid_t, struct timespec*)(
+	clock_gettime);
 
 Elapsed_time::Elapsed_time()
-:	c(0), init_done(false)
+:	init_done(false)
 {
 }
 
 void Elapsed_time::start()
 {
-	c = clockfn();
+	clock_gettimefn(CLOCK_REALTIME, &t);
 	init_done = true;
 }
 
-bool Elapsed_time::now(std::size_t* buffer) const
+inline long Elapsed_time::nanos(const timespec& t)
+{
+	return t.tv_sec * 1000000 + t.tv_nsec;
+}
+
+bool Elapsed_time::now(long* buffer) const
 {
 	if (buffer == 0)
 		return false;
-	*buffer = clockfn() - c;
+	timespec n;
+	clock_gettimefn(CLOCK_REALTIME, &n);
+	*buffer = nanos(n) - nanos(t);
 	return init_done;
 }
 

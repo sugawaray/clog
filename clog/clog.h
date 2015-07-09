@@ -100,7 +100,7 @@ public:
 		if (config_list == 0)
 			return;
 		if (config_at(i).measure_etime)
-			b->time.now(&b->c.elapsed_clocks);
+			b->time.now(&b->c.elapsed_time);
 		b->c.message = config_at(i).message;
 		outfn(b->c);
 	}

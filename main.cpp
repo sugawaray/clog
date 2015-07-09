@@ -5,6 +5,7 @@
 #include <clog/time_test.h>
 #include "an_impl/outimpl.h"
 #include "an_impl/outimpl_test.h"
+#include <unistd.h>
 #include <iostream>
 #include <stdexcept>
 
@@ -12,6 +13,25 @@ using std::cout;
 using std::endl;
 
 namespace {
+
+#define DEFLOG(id, m, etime)	CHOOSE(id, LOGDEF(m, etime))
+#define LOGDEF(m, etime)	{ m, etime }
+#define LOGDEFLIST	\
+DEFLOG(LEVENT1, "some event 1 happened", true),	\
+DEFLOG(LEVENT2, "some event 2 happened", true),	\
+DEFLOG(LEVENT3, "some event 3 happened", false)	\
+/**/
+#define CHOOSE(id, def) id
+enum {
+	LOGDEFLIST
+};
+#undef CHOOSE
+#define CHOOSE(id, def)	def
+clogcmn::Config logconfigs[] = {
+	LOGDEFLIST
+};
+
+clogcmn::Config_list logconfig_list(clogcmn::Config_list::create(logconfigs));
 
 bool fb0()
 {
@@ -28,6 +48,21 @@ using std::runtime_error;
 void fe()
 {
 	throw runtime_error("exception");
+}
+
+void fv0wait1()
+{
+	usleep(1000);
+}
+
+void fv0wait2()
+{
+	usleep(2000);
+}
+
+void fv1wait(int v)
+{
+	usleep(v);
 }
 
 class Sample {
@@ -61,6 +96,12 @@ void example()
 	}
 	Sample sample;
 	LM0("calling a method of the Sample object.", &Sample::mv0, sample);
+
+	clog::config_list = &logconfig_list;
+	clogcmn::Elapsed_time::clock_gettimefn = clock_gettime;
+	L0(LEVENT1, fv0wait1);
+	L0(LEVENT2, fv0wait2);
+	L1(LEVENT1, fv1wait, 300);
 
 	cout << "examples end" << endl;
 }

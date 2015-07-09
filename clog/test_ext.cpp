@@ -74,10 +74,15 @@ private:
 	Config_list list;
 };
 
-std::clock_t zero_one()
+int incrone(clockid_t c, timespec* b)
 {
-	static int r(0);
-	return r++ % 2;
+	static std::time_t s(1);
+	static long n(0);
+	b->tv_sec = s;
+	b->tv_nsec = n;
+	++s;
+	++n;
+	return 0;
 }
 
 class Fixture : private Spy_fixture, private Config_list_fixture<1> {
@@ -85,7 +90,7 @@ public:
 	Fixture() {
 		get_configs()[0].message = "message";
 		get_configs()[0].measure_etime = false;
-		clogcmn::Elapsed_time::clockfn = zero_one;
+		clogcmn::Elapsed_time::clock_gettimefn = incrone;
 	}
 
 	void require_measure_etime(bool value) {
@@ -121,7 +126,7 @@ void case_require_measuring_time(const char* ms, F fn)
 	f.require_measure_etime(true);
 	(out(0, fn))();
 	t.a(Spy::last()->has_elapsed_time(), L);
-	t.a(Spy::last()->elapsed_clocks == 1, L);
+	t.a(Spy::last()->elapsed_time == 1000001, L);
 }
 
 void t4(const char* ms)
