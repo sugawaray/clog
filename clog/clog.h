@@ -25,11 +25,16 @@ Config_list* config_list(0);
 
 namespace d {
 
+inline void outex(Content& c)
+{
+	c.exception = true;
+	outfn(c);
+}
+
 inline void outex(const char* m)
 {
 	Content c(m);
-	c.exception = true;
-	outfn(c);
+	outex(c);
 }
 
 using std::enable_if;
@@ -102,7 +107,6 @@ private:
 		if (config_at(i).measure_etime)
 			b->time.now(&b->c.elapsed_time);
 		b->c.message = config_at(i).message;
-		outfn(b->c);
 	}
 
 	template<class T>
@@ -111,10 +115,11 @@ private:
 		try {
 			f();
 			postfunc(i);
+			outfn(b->c);
 		}
 		catch (...) {
-			if (config_list != 0)
-				outex(((*config_list)[i]).message);
+			postfunc(i);
+			outfn(b->c);
 			throw;
 		}
 	}
@@ -125,11 +130,17 @@ private:
 		try {
 			R r(f());
 			postfunc(i);
+			outfn(b->c);
 			return r;
 		}
 		catch (...) {
+#if 1
 			if (config_list != 0)
 				outex(((*config_list)[i]).message);
+#else
+			postfunc(i);
+			outfn(b->c);
+#endif
 			throw;
 		}
 	}
