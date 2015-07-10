@@ -86,7 +86,7 @@ public:
 	R run(int i, F f) {
 		return runimpl<R>(i, f);
 	}
-
+private:
 	void prefunc(int i) {
 		if (config_list == 0)
 			return;
@@ -104,7 +104,7 @@ public:
 		b->c.message = config_at(i).message;
 		outfn(b->c);
 	}
-private:
+
 	template<class T>
 	typename Enable_if_void<T>::type runimpl(int i, F f) {
 		prefunc(i);
