@@ -1,5 +1,6 @@
 .POSIX :
 
+CP = /bin/cp
 ECHO = /bin/echo
 FIND = /usr/bin/find
 PWD = /bin/pwd
@@ -15,6 +16,7 @@ INCPATH = -I$(ROOTDIR)/include -I$(ROOTDIR)/otherlibs
 INCPATH_AN_IMPL = -I$(ROOTDIR)/include -I$(ROOTDIR)/otherlibs -I$(ROOTDIR)/src
 
 TARGET = test
+CLOGA = libclog.a
 OBJS = 
 SRCS = $(OBJS:.o=.cpp)
 DEPENDOPT = -MM
@@ -26,7 +28,7 @@ MAKEFILE = makefile
 MAKEFILELISTR = -f $(MAKEFILE) -f depend
 MAKEFILELISTC = -f $(ROOTDIR)/$(MAKEFILE) $(MAKEFILELISTR)
 
-all : $(TARGET)
+all : $(TARGET) create_cloga
 
 clean :
 	@r=$(ROOTDIR) &&	\
@@ -37,6 +39,11 @@ clean :
 				"ROOTDIR=$$r" clean);	\
 		done
 	@-$(RM) $(TARGET) $(OBJS) depend
+	@-if [ "x$$($(PWD))" = "x$(ROOTDIR)" ];	\
+	then	\
+		$(RM) ./src/$(CLOGA);	\
+		$(RM) ./lib/$(CLOGA);	\
+	fi
 
 depend :
 	@r=$(ROOTDIR) &&	\
@@ -67,6 +74,14 @@ $(TARGET) : $(OBJS) call_submake
 		$(LD) -o $@	\
 			$$($(FIND) . -name '*.o') $(LDFLAGS);	\
 	fi
+
+create_cloga :
+	@r=$(ROOTDIR) && (	\
+		cd ./src &&	\
+		$(MAKE) -f $${r}/$(MAKEFILE) -f $(MAKEFILE)	\
+			"ROOTDIR=$$r" $(CLOGA)	\
+		)
+	@$(CP) ./src/$(CLOGA) ./lib
 
 call_submake :
 	@r=$(ROOTDIR) &&	\
