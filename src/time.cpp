@@ -1,4 +1,4 @@
-#include "time.h"
+#include <clog/time.h>
 
 namespace clogcmn {
 

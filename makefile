@@ -1,22 +1,25 @@
 .POSIX :
 
+ECHO = /bin/echo
 FIND = /usr/bin/find
 PWD = /bin/pwd
 RM = /bin/rm
+WC = /usr/bin/wc
 
 CC = gcc
 LD = gcc
 CFLAGS = -Wall -std=c++0x -pedantic $(INCPATH)
 LDFLAGS = -lstdc++ -lm
 ROOTDIR = $$($(PWD))
-INCPATH = -I$(ROOTDIR) -I$(ROOTDIR)/otherlibs
+INCPATH = -I$(ROOTDIR)/include -I$(ROOTDIR)/otherlibs
+INCPATH_AN_IMPL = -I$(ROOTDIR)/include -I$(ROOTDIR)/otherlibs -I$(ROOTDIR)/src
 
 TARGET = test
-OBJS = main.o
+OBJS = 
 SRCS = $(OBJS:.o=.cpp)
 DEPENDOPT = -MM
 
-DIRS = an_impl clog
+DIRS = an_impl src
 
 CALL_MAKE = 1
 MAKEFILE = makefile
@@ -44,7 +47,10 @@ depend :
 				"ROOTDIR=$$r" depend);	\
 		done
 	@-$(RM) depend
-	@$(CC) $(CFLAGS) $(SRCS) $(DEPENDOPT) > depend
+	@if [ $$($(ECHO) $(SRCS) | $(WC) -w) -ne 0 ];	\
+	then	\
+		$(CC) $(CFLAGS) $(SRCS) $(DEPENDOPT) > depend;	\
+	fi
 
 compile :
 	@$(MAKE) -f $(ROOTDIR)/$(MAKEFILE) -f $(MAKEFILE) -f depend	\

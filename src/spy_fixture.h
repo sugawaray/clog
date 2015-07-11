@@ -1,8 +1,8 @@
 #ifndef __SPY_FIXTURE_H__
 #define __SPY_FIXTURE_H__
 
-#include "clog.h"
 #include "spy.h"
+#include <clog/clog.h>
 #include <iostream>
 
 namespace {

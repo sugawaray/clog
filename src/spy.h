@@ -1,7 +1,7 @@
 #ifndef __TEST_SPY_H__
 #define __TEST_SPY_H__
 
-#include "content.h"
+#include <clog/content.h>
 
 namespace test {
 

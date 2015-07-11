@@ -1,10 +1,10 @@
+#include "test.h"
+#include "test_ext.h"
+#include "spy_test.h"
+#include "time_test.h"
 #include <clog/clog.h>
-#include <clog/test.h>
-#include <clog/test_ext.h>
-#include <clog/spy_test.h>
-#include <clog/time_test.h>
-#include "an_impl/outimpl.h"
-#include "an_impl/outimpl_test.h"
+#include <an_impl/outimpl.h>
+#include <an_impl/outimpl_test.h>
 #include <unistd.h>
 #include <iostream>
 #include <stdexcept>

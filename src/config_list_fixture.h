@@ -1,8 +1,8 @@
 #ifndef __CONFIG_LIST_FIXTURE_H__
 #define __CONFIG_LIST_FIXTURE_H__
 
-#include "clog.h"
-#include "config.h"
+#include <clog/clog.h>
+#include <clog/config.h>
 
 namespace test {
 namespace {

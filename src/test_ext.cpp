@@ -1,13 +1,13 @@
+#include "config_list_fixture.h"
 #include "spy_fixture.h"
 #include "test_ext.h"
-#include "clog.h"
-#include "config_list_fixture.h"
-#include "time.h"
+#include <clog/clog.h>
+#include <clog/time.h>
 #include <nomagic.h>
 #include <ctime>
 #include <iostream>
 
-#include <macros.h>
+#include "macros.h"
 
 namespace test {
 namespace {

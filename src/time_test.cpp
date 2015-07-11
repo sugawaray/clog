@@ -1,11 +1,11 @@
-#include "time.h"
 #include "time_test.h"
+#include <clog/time.h>
 #include <nomagic.h>
 #include <cstddef>
 #include <ctime>
 #include <iostream>
 
-#include <macros.h>
+#include "macros.h"
 
 namespace clogcmn {
 namespace test {
