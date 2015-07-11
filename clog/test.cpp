@@ -4,6 +4,7 @@
 #include <clog/clog.h>
 #include <clog/config.h>
 #include <nomagic.h>
+#include <cassert>
 #include <functional>
 #include <stdexcept>
 #include <string>
@@ -792,25 +793,34 @@ protected:
 	}
 };
 
+template<class Mp>
 class Test_extended_v0 : public Test_0,
 	private ::test::Config_list_fixture<1> {
 public:
-	Test_extended_v0(const char* ms)
-		:	Test_0(ms) {
+	Test_extended_v0(const char* ms, Mp mp)
+		:	Test_0(ms), mp(mp) {
 		auto& configs(get_configs());
 		configs[0].message = "message";
-		configs[1].measure_etime = true;
+		configs[0].measure_etime = true;
 	}
 protected:
 	void call_and_assert() {
-		(clog::out(0, &Sample::mv0))(sample);
+		(clog::out(0, mp))(sample);
 	}
 
 	void verify() {
 		Test_0::verify();
 		a(Spy::last()->has_elapsed_time(), L);
 	}
+
+	Mp mp;
 };
+
+template<class M>
+inline Test_extended_v0<M> test_extended_v0(const char* ms, M mp)
+{
+	return Test_extended_v0<M>(ms, mp);
+}
 
 class Test_1 : public Test_0 {
 public:
@@ -928,7 +938,17 @@ namespace ext {
 
 void t1(const char* ms)
 {
-	(Test_extended_v0(ms)).start();
+	(test_extended_v0(ms, &Sample::mv0)).start();
+}
+
+void t2(const char* ms)
+{
+	//(test_extended_v0(ms, &Sample::mi0)).start();
+}
+
+void t3(const char* ms)
+{
+	(test_extended_v0(ms, &Sample::mv0c)).start();
 }
 
 } // ext
@@ -995,6 +1015,8 @@ void log_extended_method_tests()
 	using namespace nlogm::ext;
 
 	run("method, return(void), arg(0)", t1);
+	run("method, return(int), arg(0)", t2);
+	run("method, return(void), arg(0), const", t3);
 }
 
 } // unnamed

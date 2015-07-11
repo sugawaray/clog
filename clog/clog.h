@@ -435,20 +435,51 @@ private:
 	int id;
 };
 
-template<class C, class R>
-class Simple_cimpl<R(C::*)() const> {
+template<template<class T> class Te, class C, class R>
+class Cimpl<Te<R(C::*)() const> > {
 public:
-	Simple_cimpl(const char* m, R(C::*p)() const)
-		:	m(m), p(p) {
+	typedef Te<R(C::*)() const> derived;
+	Cimpl(R(C::*p)() const)
+		:	p(p) {
 	}
 
 	R operator()(const C& o) const {
 		auto bf(bind(p, Arg<const C&>::convert(o)));
-		return Outcall<R, decltype(bf)>::call(m, bf);
+		return Outcall<R, decltype(bf)>::call(
+			static_cast<const derived*>(this)->get_id(), bf);
+	}
+private:
+	R (C::*p)() const;
+};
+
+template<class C, class R>
+class Simple_cimpl<R(C::*)() const> :
+	public Cimpl<Simple_cimpl<R(C::*)() const> > {
+public:
+	Simple_cimpl(const char* m, R(C::*p)() const)
+		:	Cimpl<Simple_cimpl<R(C::*)() const> >(p), m(m) {
+	}
+
+	const char* get_id() const {
+		return m;
 	}
 private:
 	const char* m;
-	R (C::*p)() const;
+};
+
+template<class C, class R>
+class Extended_cimpl<R(C::*)() const> :
+	public Cimpl<Extended_cimpl<R(C::*)() const> > {
+public:
+	Extended_cimpl(int id, R(C::*p)() const)
+		:	Cimpl<Extended_cimpl<R(C::*)() const> >(p), id(id) {
+	}
+
+	int get_id() const {
+		return id;
+	}
+private:
+	int id;
 };
 
 template<class C, class R, class A1>
