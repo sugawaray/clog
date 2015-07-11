@@ -34,7 +34,7 @@ be able to be simplified because implementation has not completed yet.).
 		if (L2(Egetsomedata, getsomedata, v, ...) != 0) {
 			...
 		}
-		if (L1(closedb(Eclosedb, ...) != 0) {
+		if (L1(Eclosedb, closedb, ...) != 0) {
 			...
 		}
 	}
