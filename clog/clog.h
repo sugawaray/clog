@@ -197,7 +197,7 @@ struct Outcall<void, F> {
 	}
 };
 
-template<class F>
+template<class F, class I>
 class Simple_fimpl {
 };
 
@@ -205,11 +205,11 @@ template<class T>
 class Fimpl {
 };
 
-template<template<class A> class Te, class R>
-class Fimpl<Te<R(*)()> > {
+template<template<class A1, class A2> class Te, class R, class I>
+class Fimpl<Te<R(*)(), I> > {
 public:
 	typedef R result_type;
-	typedef Te<R(*)()> derived;
+	typedef Te<R(*)(), I> derived;
 
 	Fimpl(R(*f)()) : f(f) {
 	}
@@ -222,48 +222,30 @@ private:
 	R (*f)();
 };
 
-template<class R>
-class Simple_fimpl<R(*)()> : public Fimpl<Simple_fimpl<R(*)()> > {
+template<class R, class I>
+class Simple_fimpl<R(*)(), I> : public Fimpl<Simple_fimpl<R(*)(), I> > {
 public:
 	typedef R result_type;
 
-	Simple_fimpl(const char* m, R(*f)())
-		:	Fimpl<Simple_fimpl<R(*)()> >(f), m(m) {
+	Simple_fimpl(I i, R(*f)())
+		:	Fimpl<Simple_fimpl<R(*)(), I> >(f), i(i) {
 	}
 
-	const char* get_id() const {
-		return m;
+	I get_id() const {
+		return i;
 	}
 
 private:
-	const char* m;
-};
-
-template<class F>
-class Extended_fimpl {
-};
-
-template<class R>
-class Extended_fimpl<R(*)()> : public Fimpl<Extended_fimpl<R(*)()> > {
-public:
-	Extended_fimpl(int id, R(*f)())
-		:	Fimpl<Extended_fimpl<R(*)()> >(f), id(id) {
-	}
-
-	int get_id() const {
-		return id;
-	}
-private:
-	int id;
+	I i;
 };
 
 using std::bind;
 
-template<template<class A> class Te, class R, class T1>
-class Fimpl<Te<R(*)(T1)> > {
+template<template<class A1, class A2> class Te, class R, class T1, class I>
+class Fimpl<Te<R(*)(T1), I> > {
 public:
 	typedef R result_type;
-	typedef Te<R(*)(T1)> derived;
+	typedef Te<R(*)(T1), I> derived;
 
 	Fimpl(R (*f)(T1))
 		:	f(f) {
@@ -279,39 +261,26 @@ private:
 	F f;
 };
 
-template<class R, class T1>
-class Simple_fimpl<R(*)(T1)> : public Fimpl<Simple_fimpl<R(*)(T1)> > {
+template<class R, class T1, class I>
+class Simple_fimpl<R(*)(T1), I> : public Fimpl<Simple_fimpl<R(*)(T1), I> > {
 public:
-	Simple_fimpl(const char* m, R (*f)(T1))
-		:	Fimpl<Simple_fimpl<R(*)(T1)> >(f), m(m) {
+	Simple_fimpl(I i, R (*f)(T1))
+		:	Fimpl<Simple_fimpl<R(*)(T1), I> >(f), i(i) {
 	}
 
-	const char* get_id() const {
-		return m;
+	I get_id() const {
+		return i;
 	}
 private:
-	const char* m;
+	I i;
 };
 
-template<class R, class T1>
-class Extended_fimpl<R(*)(T1)> : public Fimpl<Extended_fimpl<R(*)(T1)> > {
-public:
-	Extended_fimpl(int id, R(*f)(T1))
-		:	Fimpl<Extended_fimpl<R(*)(T1)> >(f), id(id) {
-	}
-
-	int get_id() const {
-		return id;
-	}
-private:
-	int id;
-};
-
-template<template<class A> class Te, class R, class T1, class T2>
-class Fimpl<Te<R(*)(T1,T2)> > {
+template<template<class A1, class A2> class Te,
+	class R, class T1, class T2, class I>
+class Fimpl<Te<R(*)(T1,T2), I> > {
 public:
 	typedef R result_type;
-	typedef Te<R(*)(T1,T2)> derived;
+	typedef Te<R(*)(T1,T2), I> derived;
 
 	Fimpl(R (*f)(T1, T2))
 		:	f(f) {
@@ -328,35 +297,21 @@ private:
 	F f;
 };
 
-template<class R, class T1, class T2>
-class Simple_fimpl<R(*)(T1,T2)> : public Fimpl<Simple_fimpl<R(*)(T1,T2)> > {
+template<class R, class T1, class T2, class I>
+class Simple_fimpl<R(*)(T1,T2), I> :
+	public Fimpl<Simple_fimpl<R(*)(T1,T2), I> > {
 public:
 	typedef R result_type;
 
-	Simple_fimpl(const char* m, R (*f)(T1, T2))
-		:	Fimpl<Simple_fimpl<R(*)(T1,T2)> >(f), m(m) {
+	Simple_fimpl(I i, R (*f)(T1, T2))
+		:	Fimpl<Simple_fimpl<R(*)(T1,T2), I> >(f), i(i) {
 	}
 
-	const char* get_id() const {
-		return m;
+	I get_id() const {
+		return i;
 	}
 private:
-	const char* m;
-};
-
-template<class R, class T1, class T2>
-class Extended_fimpl<R(*)(T1,T2)> :
-	public Fimpl<Extended_fimpl<R(*)(T1,T2)> > {
-public:
-	Extended_fimpl(int id, R(*f)(T1,T2))
-		:	Fimpl<Extended_fimpl<R(*)(T1,T2)> >(f), id(id) {
-	}
-
-	int get_id() const {
-		return id;
-	}
-private:
-	int id;
+	I i;
 };
 
 } // d
@@ -518,18 +473,11 @@ private:
 
 } // d
 
-template<class T>
-inline typename d::Enable_if_not_mp<T, d::Simple_fimpl<T> >::type
-	out(const char* m, T f)
+template<class T, class I>
+inline typename d::Enable_if_not_mp<T, d::Simple_fimpl<T, I> >::type
+	out(I i, T f)
 {
-	return d::Simple_fimpl<T>(m, f);
-}
-
-template<class T>
-inline typename d::Enable_if_not_mp<T, d::Extended_fimpl<T> >::type
-	out(int id, T f)
-{
-	return d::Extended_fimpl<T>(id, f);
+	return d::Simple_fimpl<T, I>(i, f);
 }
 
 template<class T>
@@ -548,7 +496,7 @@ inline typename d::Enable_if_mp<T, d::Extended_cimpl<T> >::type
 
 template<class F>
 struct Out_result {
-	typedef typename d::Simple_fimpl<F>::result_type type;
+	typedef typename d::Simple_fimpl<F, int>::result_type type;
 };
 
 } // clog
