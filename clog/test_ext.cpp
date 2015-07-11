@@ -139,31 +139,53 @@ void t5(const char* ms)
 	case_require_measuring_time(ms, fsuccess_i);
 }
 
-void t6(const char* ms)
+template<class F>
+void case_do_not_require_measuring_time_exception(const char* ms, F fn)
 {
 	Test t(ms);
 	Fixture f;
 	f.require_measure_etime(false);
 	try {
-		(out(0, ferror_v))();
+		(out(0, fn))();
 	}
 	catch (const E&) {
 	}
 	t.a(!Spy::last()->has_elapsed_time(), L);
 }
 
-void t7(const char* ms)
+void t6(const char* ms)
+{
+	case_do_not_require_measuring_time_exception(ms, ferror_v);
+}
+
+template<class F>
+void case_require_measuring_time_exception(const char* ms, F fn)
 {
 	Test t(ms);
 	Fixture f;
 	f.require_measure_etime(true);
 	try {
-		(out(0, ferror_v))();
+		(out(0, fn))();
 	}
 	catch (const E&) {
 	}
 	t.a(Spy::last()->has_elapsed_time(), L);
 	t.a(Spy::last()->elapsed_time == 1000001, L);
+}
+
+void t7(const char* ms)
+{
+	case_require_measuring_time_exception(ms, ferror_v);
+}
+
+void t8(const char* ms)
+{
+	case_do_not_require_measuring_time_exception(ms, ferror_i);
+}
+
+void t9(const char* ms)
+{
+	case_require_measuring_time_exception(ms, ferror_i);
 }
 
 } // unnamed
@@ -191,6 +213,14 @@ void run_clog_extension_tests()
 
 	run(	"It measures elapsed time if its flag is set "
 		"when the function throws exception.", t7);
+
+	run(	"It does not measure elapsed time if its flag is not set "
+		"when the function throws exception.(return type not void",
+		t8);
+
+	run(	"It measures elapsed time if its flag is set "
+		"when the function throws exception.(return type not void",
+		t9);
 }
 
 } // test

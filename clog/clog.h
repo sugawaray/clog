@@ -134,7 +134,7 @@ private:
 			return r;
 		}
 		catch (...) {
-#if 1
+#if 0
 			if (config_list != 0)
 				outex(((*config_list)[i]).message);
 #else
