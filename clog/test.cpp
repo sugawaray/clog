@@ -1,3 +1,4 @@
+#include "config_list_fixture.h"
 #include "spy.h"
 #include "spy_fixture.h"
 #include <clog/clog.h>
@@ -791,6 +792,26 @@ protected:
 	}
 };
 
+class Test_extended_v0 : public Test_0,
+	private ::test::Config_list_fixture<1> {
+public:
+	Test_extended_v0(const char* ms)
+		:	Test_0(ms) {
+		auto& configs(get_configs());
+		configs[0].message = "message";
+		configs[1].measure_etime = true;
+	}
+protected:
+	void call_and_assert() {
+		(clog::out(0, &Sample::mv0))(sample);
+	}
+
+	void verify() {
+		Test_0::verify();
+		a(Spy::last()->has_elapsed_time(), L);
+	}
+};
+
 class Test_1 : public Test_0 {
 public:
 	Test_1(const char* ms)
@@ -813,6 +834,28 @@ protected:
 		(clog::out(m, &Sample::mv1))(sample, nf::a);
 	}
 };
+
+#if 0
+class Test_extended_v1 : public Test_1,
+	private ::test::Config_list_fixture<1> {
+public:
+	Test_extended_v1(const char* ms)
+		:	Test_1(ms) {
+		auto& configs(get_configs());
+		configs[0].message = "message";
+		configs[1].measure_etime = true;
+	}
+protected:
+	void call_and_assert() {
+		(clog::out(0, &Sample::mv1))(sample, nf::a);
+	}
+
+	void verify() {
+		Test_1::verify();
+		a(Spy::last()->has_elapsed_time(), L);
+	}
+};
+#endif
 
 class Test_v1c : public Test_1 {
 public:
@@ -882,6 +925,12 @@ void t6(const char* ms)
 } // sim
 
 namespace ext {
+
+void t1(const char* ms)
+{
+	(Test_extended_v0(ms)).start();
+}
+
 } // ext
 
 } // nlogm
@@ -944,6 +993,8 @@ void log_extended_method_tests()
 	cerr << "extended log method tests" << endl;
 
 	using namespace nlogm::ext;
+
+	run("method, return(void), arg(0)", t1);
 }
 
 } // unnamed

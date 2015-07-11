@@ -1,6 +1,7 @@
 #include "spy_fixture.h"
 #include "test_ext.h"
 #include "clog.h"
+#include "config_list_fixture.h"
 #include "time.h"
 #include <nomagic.h>
 #include <ctime>
@@ -57,22 +58,6 @@ void t1(const char* ms)
 	catch (const E&) {
 	}
 }
-
-template<int N>
-class Config_list_fixture {
-public:
-	Config_list_fixture() {
-		list = Config_list::create(configs);
-		config_list = &list;
-	}
-
-	Config (&get_configs())[N] {
-		return configs;
-	}
-private:
-	Config configs[N];
-	Config_list list;
-};
 
 int incrone(clockid_t c, timespec* b)
 {
