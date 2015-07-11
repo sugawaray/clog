@@ -1,25 +1,45 @@
-* About this library
+* ABOUT THIS LIBRARY
 
-	This is a simple logging library although I have not written any parts
-	of it yet.
+This is a simple logging library for C++.
 
-	Intended readers of the log are developers.
+Its main feature is that it enables to call a logging function and a normal
+function at the same time.
 
-	* This library is under construction.
+This simplifies code which needs to output logs for several events.
 
-* Motivation
+For example, when you write code which use databases ...
 
-	I want to write a logging library which is easy enough to write
-	logging code.
+	if (opendb(..., ...) == 0) {
+		LOG("opened a db connection");
+		if (getsomedata(v, ...) != 0) {
+			LOG("failed to get some data");
+			...
+		}
+		if (closedb(...) != 0) {
+			LOG("failed to close a db connection.");
+			...
+		} else {
+			LOG("db connection is closed.");
+		}
+	} else {
+		...
+		LOG("failed to open a db connection");
+		...
+	}
 
-	It is often difficult for me to write logging code.
-	
-	I often think I will add logging code later after implementing
-	necessary features. But then after testing is done, I often think
-	I do not want to add logging code because testing have already
-	been done.
+Using this library, the example above can be simplified like below(or will
+be able to be simplified because implementation has not completed yet.).
 
-	I think this is not good habit.
+	if (L2(Eopendb, opendb, ..., ...) == 0) {
+		if (L2(Egetsomedata, getsomedata, v, ...) != 0) {
+			...
+		}
+		if (L1(closedb(Eclosedb, ...) != 0) {
+			...
+		}
+	}
 
-	I am not sure whether I can create it or not. But I hit upon an idea,
-	so I try it.
+Intended readers of the log are developers.
+
+* This library is under construction and its API changes frequently.
+
