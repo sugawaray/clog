@@ -334,20 +334,15 @@ class Cimpl {
 public:
 };
 
-template<class T>
+template<class T, class I>
 class Simple_cimpl {
 public:
 };
 
-template<class T>
-class Extended_cimpl {
+template<template<class A, class I> class Te, class C, class R, class I>
+class Cimpl<Te<R(C::*)(), I> > {
 public:
-};
-
-template<template<class A> class Te, class C, class R>
-class Cimpl<Te<R(C::*)()> > {
-public:
-	typedef Te<R(C::*)()> derived;
+	typedef Te<R(C::*)(), I> derived;
 
 	Cimpl(R(C::*p)())
 		:	p(p) {
@@ -362,38 +357,25 @@ private:
 	R (C::*p)();
 };
 
-template<class C, class R>
-class Simple_cimpl<R(C::*)()> : public Cimpl<Simple_cimpl<R(C::*)()> > {
+template<class C, class R, class I>
+class Simple_cimpl<R(C::*)(), I> :
+	public Cimpl<Simple_cimpl<R(C::*)(), I> > {
 public:
-	Simple_cimpl(const char* m, R(C::*p)())
-		:	Cimpl<Simple_cimpl<R(C::*)()> >(p), m(m) {
+	Simple_cimpl(I i, R(C::*p)())
+		:	Cimpl<Simple_cimpl<R(C::*)(), I> >(p), i(i) {
 	}
 
-	const char* get_id() const {
-		return m;
+	I get_id() const {
+		return i;
 	}
 private:
-	const char* m;
+	I i;
 };
 
-template<class C, class R>
-class Extended_cimpl<R(C::*)()> : public Cimpl<Extended_cimpl<R(C::*)()> > {
+template<template<class A1, class A2> class Te, class C, class R, class I>
+class Cimpl<Te<R(C::*)() const, I> > {
 public:
-	Extended_cimpl(int id, R(C::*p)())
-		:	Cimpl<Extended_cimpl<R(C::*)()> >(p), id(id) {
-	}
-
-	int get_id() const {
-		return id;
-	}
-private:
-	int id;
-};
-
-template<template<class T> class Te, class C, class R>
-class Cimpl<Te<R(C::*)() const> > {
-public:
-	typedef Te<R(C::*)() const> derived;
+	typedef Te<R(C::*)() const, I> derived;
 	Cimpl(R(C::*p)() const)
 		:	p(p) {
 	}
@@ -407,38 +389,23 @@ private:
 	R (C::*p)() const;
 };
 
-template<class C, class R>
-class Simple_cimpl<R(C::*)() const> :
-	public Cimpl<Simple_cimpl<R(C::*)() const> > {
+template<class C, class R, class I>
+class Simple_cimpl<R(C::*)() const, I> :
+	public Cimpl<Simple_cimpl<R(C::*)() const, I> > {
 public:
-	Simple_cimpl(const char* m, R(C::*p)() const)
-		:	Cimpl<Simple_cimpl<R(C::*)() const> >(p), m(m) {
+	Simple_cimpl(I i, R(C::*p)() const)
+		:	Cimpl<Simple_cimpl<R(C::*)() const, I> >(p), i(i) {
 	}
 
-	const char* get_id() const {
-		return m;
+	I get_id() const {
+		return i;
 	}
 private:
-	const char* m;
+	I i;
 };
 
-template<class C, class R>
-class Extended_cimpl<R(C::*)() const> :
-	public Cimpl<Extended_cimpl<R(C::*)() const> > {
-public:
-	Extended_cimpl(int id, R(C::*p)() const)
-		:	Cimpl<Extended_cimpl<R(C::*)() const> >(p), id(id) {
-	}
-
-	int get_id() const {
-		return id;
-	}
-private:
-	int id;
-};
-
-template<class C, class R, class A1>
-class Simple_cimpl<R(C::*)(A1)> {
+template<class C, class R, class A1, class I>
+class Simple_cimpl<R(C::*)(A1), I> {
 public:
 	Simple_cimpl(const char* m, R(C::*p)(A1))
 		:	m(m), p(p) {
@@ -454,8 +421,8 @@ private:
 	R (C::*p)(A1);
 };
 
-template<class C, class R, class A1>
-class Simple_cimpl<R(C::*)(A1) const> {
+template<class C, class R, class A1, class I>
+class Simple_cimpl<R(C::*)(A1) const, I> {
 public:
 	Simple_cimpl(const char* m, R(C::*p)(A1) const)
 		:	m(m), p(p) {
@@ -480,18 +447,11 @@ inline typename d::Enable_if_not_mp<T, d::Simple_fimpl<T, I> >::type
 	return d::Simple_fimpl<T, I>(i, f);
 }
 
-template<class T>
-inline typename d::Enable_if_mp<T, d::Simple_cimpl<T> >::type
-	out(const char* m, T mp)
+template<class T, class I>
+inline typename d::Enable_if_mp<T, d::Simple_cimpl<T, I> >::type
+	out(I i, T mp)
 {
-	return d::Simple_cimpl<T>(m, mp);
-}
-
-template<class T>
-inline typename d::Enable_if_mp<T, d::Extended_cimpl<T> >::type
-	out(int id, T mp)
-{
-	return d::Extended_cimpl<T>(id, mp);
+	return d::Simple_cimpl<T, I>(i, mp);
 }
 
 template<class F>
