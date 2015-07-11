@@ -845,27 +845,34 @@ protected:
 	}
 };
 
-#if 0
+template<class M>
 class Test_extended_v1 : public Test_1,
 	private ::test::Config_list_fixture<1> {
 public:
-	Test_extended_v1(const char* ms)
-		:	Test_1(ms) {
+	Test_extended_v1(const char* ms, M mp)
+		:	Test_1(ms), mp(mp) {
 		auto& configs(get_configs());
 		configs[0].message = "message";
-		configs[1].measure_etime = true;
+		configs[0].measure_etime = true;
 	}
 protected:
 	void call_and_assert() {
-		(clog::out(0, &Sample::mv1))(sample, nf::a);
+		(clog::out(0, mp))(sample, nf::a);
 	}
 
 	void verify() {
 		Test_1::verify();
 		a(Spy::last()->has_elapsed_time(), L);
 	}
+
+	M mp;
 };
-#endif
+
+template<class M>
+inline Test_extended_v1<M> test_extended_v1(const char* ms, M mp)
+{
+	return Test_extended_v1<M>(ms, mp);
+}
 
 class Test_v1c : public Test_1 {
 public:
@@ -943,12 +950,22 @@ void t1(const char* ms)
 
 void t2(const char* ms)
 {
-	//(test_extended_v0(ms, &Sample::mi0)).start();
+	(test_extended_v0(ms, &Sample::mi0)).start();
 }
 
 void t3(const char* ms)
 {
 	(test_extended_v0(ms, &Sample::mv0c)).start();
+}
+
+void t5(const char* ms)
+{
+	(test_extended_v1(ms, &Sample::mv1)).start();
+}
+
+void t6(const char* ms)
+{
+	(test_extended_v1(ms, &Sample::mv1c)).start();
 }
 
 } // ext
@@ -1017,6 +1034,8 @@ void log_extended_method_tests()
 	run("method, return(void), arg(0)", t1);
 	run("method, return(int), arg(0)", t2);
 	run("method, return(void), arg(0), const", t3);
+	run("method, return(void), arg(1)", t5);
+	run("method, return(void), arg(1), const", t6);
 }
 
 } // unnamed

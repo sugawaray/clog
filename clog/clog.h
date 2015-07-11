@@ -404,38 +404,74 @@ private:
 	I i;
 };
 
-template<class C, class R, class A1, class I>
-class Simple_cimpl<R(C::*)(A1), I> {
+template<template<class N1, class N2> class Te,
+	class C, class R, class A1, class I>
+class Cimpl<Te<R(C::*)(A1), I> > {
 public:
-	Simple_cimpl(const char* m, R(C::*p)(A1))
-		:	m(m), p(p) {
+	typedef Te<R(C::*)(A1), I> derived;
+
+	Cimpl(R(C::*p)(A1))
+		:	p(p) {
 	}
 
 	R operator()(C& o, A1 a1) const {
 		auto bf(bind(p, Arg<C&>::convert(o),
 			Arg<A1>::convert(a1)));
-		return Outcall<R, decltype(bf)>::call(m, bf);
+		return Outcall<R, decltype(bf)>::call(
+			static_cast<const derived*>(this)->get_id(), bf);
 	}
 private:
-	const char* m;
 	R (C::*p)(A1);
 };
 
 template<class C, class R, class A1, class I>
-class Simple_cimpl<R(C::*)(A1) const, I> {
+class Simple_cimpl<R(C::*)(A1), I> :
+	public Cimpl<Simple_cimpl<R(C::*)(A1), I> > {
 public:
-	Simple_cimpl(const char* m, R(C::*p)(A1) const)
-		:	m(m), p(p) {
+	Simple_cimpl(I i, R(C::*p)(A1))
+		:	Cimpl<Simple_cimpl<R(C::*)(A1), I> >(p), i(i) {
+	}
+
+	I get_id() const {
+		return i;
+	}
+private:
+	I i;
+};
+
+template<template<class N1, class N2> class Te,
+	class C, class R, class A1, class I>
+class Cimpl<Te<R(C::*)(A1) const, I> > {
+public:
+	typedef Te<R(C::*)(A1) const, I> derived;
+
+	Cimpl(R(C::*p)(A1) const)
+		:	p(p) {
 	}
 
 	R operator()(C& o, A1 a1) const {
 		auto bf(bind(p, Arg<const C&>::convert(o),
 			Arg<A1>::convert(a1)));
-		return Outcall<R, decltype(bf)>::call(m, bf);
+		return Outcall<R, decltype(bf)>::call(
+			static_cast<const derived*>(this)->get_id(), bf);
 	}
 private:
-	const char* m;
 	R (C::*p)(A1) const;
+};
+
+template<class C, class R, class A1, class I>
+class Simple_cimpl<R(C::*)(A1) const, I> :
+	public Cimpl<Simple_cimpl<R(C::*)(A1) const, I> > {
+public:
+	Simple_cimpl(I i, R(C::*p)(A1) const)
+		:	Cimpl<Simple_cimpl<R(C::*)(A1) const, I> >(p), i(i) {
+	}
+
+	I get_id() const {
+		return i;
+	}
+private:
+	I i;
 };
 
 } // d
