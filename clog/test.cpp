@@ -847,6 +847,8 @@ protected:
 	}
 };
 
+namespace sim {
+
 void t1(const char* ms)
 {
 	(Test_v0(ms)).start();
@@ -877,13 +879,20 @@ void t6(const char* ms)
 	(Test_v1c(ms)).start();
 }
 
+} // sim
+
+namespace ext {
+} // ext
+
 } // nlogm
 
 using nomagic::run;
+using std::cerr;
+using std::endl;
 
 void log_tests()
 {
-	std::cerr << "simple log tests" << std::endl;
+	cerr << "simple log tests" << endl;
 
 	using namespace nlog::nsimple;
 
@@ -905,7 +914,7 @@ void log_tests()
 
 void log_extended_tests()
 {
-	std::cerr << "extended log tests" << std::endl;
+	cerr << "extended log tests" << endl;
 
 	using namespace nlog::nextended;
 
@@ -918,7 +927,9 @@ void log_extended_tests()
 
 void log_method_tests()
 {
-	using namespace nlogm;
+	cerr << "simple log method tests" << endl;
+
+	using namespace nlogm::sim;
 
 	run("method, return(void), arg(0)", t1);
 	run("method, return(int), arg(0)", t2);
@@ -926,6 +937,13 @@ void log_method_tests()
 	run("method, return(int), arg(0), const", t4);
 	run("method, return(void), arg(1)", t5);
 	run("method, return(void), arg(1), const", t6);
+}
+
+void log_extended_method_tests()
+{
+	cerr << "extended log method tests" << endl;
+
+	using namespace nlogm::ext;
 }
 
 } // unnamed
@@ -939,6 +957,7 @@ void run_clog_tests()
 	log_tests();
 	log_extended_tests();
 	log_method_tests();
+	log_extended_method_tests();
 }
 
 } // test
