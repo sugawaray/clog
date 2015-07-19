@@ -36,6 +36,9 @@ std::string to_string(const Content& content)
 		os << "(an exception is thrown)";
 	if (content.elapsed_time_valid)
 		os << Nanos(content.elapsed_time);
+#if 0
+	os << "(return value:" << content.return_value.to_string() << ")";
+#endif
 	return os.str();
 }
 

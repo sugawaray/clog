@@ -6,6 +6,7 @@
 #include <nomagic.h>
 #include <ctime>
 #include <iostream>
+#include <string>
 
 #include "macros.h"
 
@@ -25,6 +26,11 @@ void fsuccess_v()
 int fsuccess_i()
 {
 	return 1;
+}
+
+long long fsuccess_ll()
+{
+	return 9223372036854775807;//at least LLONG_MAX
 }
 
 void ferror_v()
@@ -78,11 +84,16 @@ public:
 	Fixture() {
 		get_configs()[0].message = "message";
 		get_configs()[0].measure_etime = false;
+		get_configs()[0].store_return_value = false;
 		clogcmn::Elapsed_time::clock_gettimefn = incrone;
 	}
 
 	void require_measure_etime(bool value) {
 		get_configs()[0].measure_etime = value;
+	}
+
+	void require_store_return_value(bool value) {
+		get_configs()[0].store_return_value = value;
 	}
 };
 
@@ -96,6 +107,8 @@ void case_do_not_require_measuring_time(const char* ms, F fn)
 	t.a(!Spy::last()->has_elapsed_time(), L);
 }
 
+namespace nme {
+
 void t2(const char* ms)
 {
 	case_do_not_require_measuring_time(ms, fsuccess_v);
@@ -105,6 +118,8 @@ void t3(const char* ms)
 {
 	case_do_not_require_measuring_time(ms, fsuccess_i);
 }
+
+} // nme
 
 template<class F>
 void case_require_measuring_time(const char* ms, F fn)
@@ -117,6 +132,8 @@ void case_require_measuring_time(const char* ms, F fn)
 	t.a(Spy::last()->elapsed_time == 1000001, L);
 }
 
+namespace nme {
+
 void t4(const char* ms)
 {
 	case_require_measuring_time(ms, fsuccess_v);
@@ -126,6 +143,8 @@ void t5(const char* ms)
 {
 	case_require_measuring_time(ms, fsuccess_i);
 }
+
+} // nme
 
 template<class F>
 void case_do_not_require_measuring_time_exception(const char* ms, F fn)
@@ -141,10 +160,14 @@ void case_do_not_require_measuring_time_exception(const char* ms, F fn)
 	t.a(!Spy::last()->has_elapsed_time(), L);
 }
 
+namespace nme {
+
 void t6(const char* ms)
 {
 	case_do_not_require_measuring_time_exception(ms, ferror_v);
 }
+
+} // nme
 
 template<class F>
 void case_require_measuring_time_exception(const char* ms, F fn)
@@ -160,6 +183,8 @@ void case_require_measuring_time_exception(const char* ms, F fn)
 	t.a(Spy::last()->has_elapsed_time(), L);
 	t.a(Spy::last()->elapsed_time == 1000001, L);
 }
+
+namespace nme {
 
 void t7(const char* ms)
 {
@@ -205,13 +230,86 @@ void run_measure_etime_tests()
 		t9);
 }
 
+} // nme
+
+namespace nrv {
+
+using std::string;
+
+// ex means an expected value.
+template<class F>
+void case_does_not_store_value(const char* ms, F f, const string& ex)
+{
+	Test t(ms);
+	Fixture fi;
+	(out(0, f))();
+	t.a(Spy::last()->return_value.to_string() == ex, L);
+}
+
+// ex means an expected value.
+template<class F, class Fv>
+void case_stores_value(const char* ms, F f, Fv fv, const string& ex)
+{
+	Test t(ms);
+	Fixture fi;
+	fi.require_store_return_value(true);
+	(out(0, f))();
+	fv(t, Spy::last()->return_value.to_string(), ex, L);
+}
+
+void t1(const char* ms)
+{
+	case_does_not_store_value(ms, fsuccess_i, clogcmn::Notset);
+}
+
+void t2(const char* ms)
+{
+	case_does_not_store_value(ms, fsuccess_v, clogcmn::Notset);
+}
+
+void verify_simple(Test& t, const string& op1, const string& op2,
+	const string& m)
+{
+	t.a(op1 == op2, m);
+}
+
+void t3(const char* ms)
+{
+	case_stores_value(ms, fsuccess_i, verify_simple, "1");
+}
+
+void t4(const char* ms)
+{
+	case_stores_value(ms, fsuccess_ll, verify_simple,
+		"9223372036854775807");
+}
+
+void run_return_value_tests()
+{
+	std::cerr << "extended log tests:return value" << std::endl;
+
+	run(	"It does not store a return value when it is not asked to "
+		"do it.", t1);
+
+	run(	"It does not store a return value when the return type is "
+		"void.", t2);
+
+	run("type int", t3);
+
+	run("type long long int", t4);
+}
+
+} // nrv
+
 } // unnamed
 
 void run_clog_extension_tests()
 {
 	run("It does not cause errors when config_list is 0.", t1);
 
-	run_measure_etime_tests();
+	nme::run_measure_etime_tests();
+
+	nrv::run_return_value_tests();
 }
 
 } // test

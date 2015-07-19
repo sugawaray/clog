@@ -109,6 +109,20 @@ private:
 		b->c.message = config_at(i).message;
 	}
 
+	bool is_storing_retval_required(int i) const {
+		if (config_list == 0)
+			return false;
+		else
+			return config_at(i).store_return_value;
+	}
+
+	template<class T>
+	void postfunc(int i, const T& r) {
+		postfunc(i);
+		if (is_storing_retval_required(i))
+			b->c.return_value.set(r);
+	}
+
 	template<class T>
 	typename Enable_if_void<T>::type runimpl(int i, F f) {
 		prefunc(i);
@@ -129,7 +143,7 @@ private:
 		prefunc(i);
 		try {
 			R r(f());
-			postfunc(i);
+			postfunc(i, r);
 			outfn(b->c);
 			return r;
 		}

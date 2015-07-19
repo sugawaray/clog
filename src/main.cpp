@@ -2,10 +2,13 @@
 #include "test_ext.h"
 #include "spy_test.h"
 #include "time_test.h"
+#include "var_test.h"
 #include <clog/clog.h>
 #include <an_impl/outimpl.h>
 #include <an_impl/outimpl_test.h>
 #include <unistd.h>
+#include <cstdlib>
+#include <ctime>
 #include <iostream>
 #include <stdexcept>
 
@@ -14,12 +17,13 @@ using std::endl;
 
 namespace {
 
-#define DEFLOG(id, m, etime)	CHOOSE(id, LOGDEF(m, etime))
-#define LOGDEF(m, etime)	{ m, etime }
+// retval means return value.
+#define DEFLOG(id, m, etime, retval)	CHOOSE(id, LOGDEF(m, etime, retval))
+#define LOGDEF(m, etime, retval)	{ m, etime, retval }
 #define LOGDEFLIST	\
-DEFLOG(LEVENT1, "some event 1 happened", true),	\
-DEFLOG(LEVENT2, "some event 2 happened", true),	\
-DEFLOG(LEVENT3, "some event 3 happened", false)	\
+DEFLOG(LEVENT1, "some event 1 happened", true, true),	\
+DEFLOG(LEVENT2, "some event 2 happened", true, true),	\
+DEFLOG(LEVENT3, "some event 3 happened", false, true)	\
 /**/
 #define CHOOSE(id, def) id
 enum {
@@ -50,19 +54,27 @@ void fe()
 	throw runtime_error("exception");
 }
 
-void fv0wait1()
+int return_rand()
+{
+	return std::rand() % 1000;
+}
+
+int fi0wait1()
 {
 	usleep(1000);
+	return return_rand();
 }
 
-void fv0wait2()
+int fi0wait2()
 {
 	usleep(2000);
+	return return_rand();
 }
 
-void fv1wait(int v)
+int fi1wait(int v)
 {
 	usleep(v);
+	return return_rand();
 }
 
 class Sample {
@@ -76,6 +88,7 @@ public:
 #define LM0(m, p, o)	((n::out((m), (p)))((o)))
 void example()
 {
+	std::srand(std::time(0));
 	cout << "some examples start" << endl;
 
 	impl::stream = &cout;
@@ -99,9 +112,9 @@ void example()
 
 	clog::config_list = &logconfig_list;
 	clogcmn::Elapsed_time::clock_gettimefn = clock_gettime;
-	L0(LEVENT1, fv0wait1);
-	L0(LEVENT2, fv0wait2);
-	L1(LEVENT1, fv1wait, 300);
+	L0(LEVENT1, fi0wait1);
+	L0(LEVENT2, fi0wait2);
+	L1(LEVENT1, fi1wait, 300);
 
 	cout << "examples end" << endl;
 }
@@ -115,6 +128,7 @@ int main()
 	test::run_clog_tests();
 	test::run_clog_extension_tests();
 	clogcmn::test::run_elapsed_time_tests();
+	clogcmn::test::run_var_tests();
 	impl::test::run_outimpl_tests();
 	cout << "test end" << endl;
 

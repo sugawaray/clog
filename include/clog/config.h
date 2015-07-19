@@ -8,6 +8,7 @@ namespace clogcmn {
 struct Config {
 	const char* message;
 	bool measure_etime;
+	bool store_return_value;
 };
 
 class Config_list {
