@@ -10,6 +10,9 @@
 #include "macros.h"
 
 namespace test {
+
+using nomagic::run;
+
 namespace {
 
 struct E {
@@ -173,14 +176,8 @@ void t9(const char* ms)
 	case_require_measuring_time_exception(ms, ferror_i);
 }
 
-} // unnamed
-
-void run_clog_extension_tests()
+void run_measure_etime_tests()
 {
-	using nomagic::run;
-
-	run("It does not cause errors when config_list is 0.", t1);
-
 	run(	"It does not measure elapsed time if its flag is not set "
 		"when return type is void.", t2);
 
@@ -206,6 +203,15 @@ void run_clog_extension_tests()
 	run(	"It measures elapsed time if its flag is set "
 		"when the function throws exception.(return type not void",
 		t9);
+}
+
+} // unnamed
+
+void run_clog_extension_tests()
+{
+	run("It does not cause errors when config_list is 0.", t1);
+
+	run_measure_etime_tests();
 }
 
 } // test
