@@ -69,10 +69,13 @@ void t1(const char* ms)
 	t.a(var<const double*>(&dv).to_string() == ss2.str(), L);
 
 	string s;
-	t.a(var<string>(s).to_string() == "object", L);
+	t.a(var<string>(s).to_string() == clogcmn::Objset, L);
 	t.a(var<const string>(s).to_string() == clogcmn::Objset, L);
-	t.a(var<string&>(s).to_string() == "object", L);
+	t.a(var<string&>(s).to_string() == clogcmn::Objset, L);
 	t.a(var<const string&>(s).to_string() == clogcmn::Objset, L);
+
+	t.a(var<bool>(true).to_string() == clogcmn::True, L);
+	t.a(var<bool>(false).to_string() == clogcmn::False, L);
 }
 
 } // unnamed

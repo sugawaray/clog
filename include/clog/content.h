@@ -13,11 +13,13 @@ using std::string;
 
 const char* const Notset("notset");
 const char* const Objset("object");
+const char* const True("true");
+const char* const False("false");
 
 class Var {
 	enum {
 		Tc, Tuc, Tsi, Tusi, Ti, Tui, Tli, Tuli, Tlli, Tulli, Tf, Td,
-		Tld, Tp, To
+		Tld, Tp, To, Tb
 	};
 public:
 	Var()
@@ -91,6 +93,10 @@ public:
 		setvar(uv.ld, newone);
 	}
 
+	void set(bool newone) {
+		setvar(uv.b, newone);
+	}
+
 	template<class T>
 	void set(T* newone) {
 		typedef typename std::add_pointer<
@@ -160,6 +166,10 @@ private:
 		type = Tld;
 	}
 
+	void settype(bool) {
+		type = Tb;
+	}
+
 	template<class T>
 	void settype(T*) {
 		type = Tp;
@@ -212,6 +222,12 @@ private:
 		case To:
 			ss << Objset;
 			break;
+		case Tb:
+			if (uv.b)
+				ss << True;
+			else
+				ss << False;
+			break;
 		}
 	}
 
@@ -230,6 +246,7 @@ private:
 		double d;
 		long double ld;
 		void *p;
+		bool b;
 	};
 	bool fset;
 	U uv;
