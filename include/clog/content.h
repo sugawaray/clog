@@ -12,11 +12,12 @@ namespace clogcmn {
 using std::string;
 
 const char* const Notset("notset");
+const char* const Objset("object");
 
 class Var {
 	enum {
 		Tc, Tuc, Tsi, Tusi, Ti, Tui, Tli, Tuli, Tlli, Tulli, Tf, Td,
-		Tld, Tp
+		Tld, Tp, To
 	};
 public:
 	Var()
@@ -30,6 +31,12 @@ public:
 			return s.str();
 		} else
 			return Notset;
+	}
+
+	template<class T>
+	void set(T newone) {
+		fset = true;
+		type = To;
 	}
 
 	void set(char newone) {
@@ -201,6 +208,9 @@ private:
 			break;
 		case Tp:
 			ss << uv.p;
+			break;
+		case To:
+			ss << Objset;
 			break;
 		}
 	}
