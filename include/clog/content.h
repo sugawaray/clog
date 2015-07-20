@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <sstream>
 #include <string>
+#include <type_traits>
 
 namespace clogcmn {
 
@@ -15,7 +16,7 @@ const char* const Notset("notset");
 class Var {
 	enum {
 		Tc, Tuc, Tsi, Tusi, Ti, Tui, Tli, Tuli, Tlli, Tulli, Tf, Td,
-		Tld
+		Tld, Tp
 	};
 public:
 	Var()
@@ -82,6 +83,16 @@ public:
 	void set(long double newone) {
 		setvar(uv.ld, newone);
 	}
+
+	template<class T>
+	void set(T* newone) {
+		typedef typename std::add_pointer<
+			typename std::remove_cv<
+				typename std::remove_pointer<T>::type
+					>::type
+				>::type P;
+		setvar(uv.p, static_cast<void*>(const_cast<P>(newone)));
+	}
 private:
 	template<class T>
 	void setvar(T& var, T value) {
@@ -142,6 +153,11 @@ private:
 		type = Tld;
 	}
 
+	template<class T>
+	void settype(T*) {
+		type = Tp;
+	}
+
 	void write(std::stringstream& ss) const {
 		switch (type) {
 		case Tc:
@@ -183,6 +199,9 @@ private:
 		case Tld:
 			ss << uv.ld;
 			break;
+		case Tp:
+			ss << uv.p;
+			break;
 		}
 	}
 
@@ -200,6 +219,7 @@ private:
 		float f;
 		double d;
 		long double ld;
+		void *p;
 	};
 	bool fset;
 	U uv;

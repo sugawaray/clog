@@ -58,6 +58,15 @@ void t1(const char* ms)
 	long double ld;
 	ss >> ld;
 	t.a(std::fabs(ld - 9.9999995) < 0.000001, L);
+
+	std::stringstream ss2;
+	ss2 << &dv;
+	t.a(var<double*>(&dv).to_string() == ss2.str(), L);
+
+	ss2.str("");
+	ss2.clear();
+	ss2 << reinterpret_cast<const double*>(&dv);
+	t.a(var<const double*>(&dv).to_string() == ss2.str(), L);
 }
 
 } // unnamed
