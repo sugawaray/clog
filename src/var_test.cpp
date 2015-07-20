@@ -1,7 +1,10 @@
 #include <clog/content.h>
 #include "var_test.h"
 #include <nomagic.h>
+#include <cmath>
+#include <iomanip>
 #include <iostream>
+#include <sstream>
 
 #include "macros.h"
 
@@ -38,7 +41,23 @@ void t1(const char* ms)
 		"-9223372036854775807", L);
 	t.a(var<unsigned long long>(18446744073709551615ULL).to_string() ==
 		"18446744073709551615", L);
-	
+	std::stringstream ss;
+	ss.str(var<float>(9.9999995).to_string());
+	float fv;
+	ss >> fv;
+	t.a(std::fabs(fv - 9.9999995) < 0.000001, L);
+
+	ss.str(var<double>(9.9999995).to_string());
+	ss.clear();
+	double dv;
+	ss >> dv;
+	t.a(std::abs(dv - 9.9999995) < 0.000001, L);
+
+	ss.str(var<long double>(9.9999995).to_string());
+	ss.clear();
+	long double ld;
+	ss >> ld;
+	t.a(std::fabs(ld - 9.9999995) < 0.000001, L);
 }
 
 } // unnamed

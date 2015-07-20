@@ -2,6 +2,7 @@
 #define __CLOGCMN_CONTENT_H__
 
 #include <cstddef>
+#include <iomanip>
 #include <sstream>
 #include <string>
 
@@ -13,7 +14,8 @@ const char* const Notset("notset");
 
 class Var {
 	enum {
-		Tc, Tuc, Tsi, Tusi, Ti, Tui, Tli, Tuli, Tlli, Tulli
+		Tc, Tuc, Tsi, Tusi, Ti, Tui, Tli, Tuli, Tlli, Tulli, Tf, Td,
+		Tld
 	};
 public:
 	Var()
@@ -68,6 +70,18 @@ public:
 	void set(unsigned long long int newone) {
 		setvar(uv.ulli, newone);
 	}
+
+	void set(float newone) {
+		setvar(uv.f, newone);
+	}
+
+	void set(double newone) {
+		setvar(uv.d, newone);
+	}
+
+	void set(long double newone) {
+		setvar(uv.ld, newone);
+	}
 private:
 	template<class T>
 	void setvar(T& var, T value) {
@@ -116,6 +130,18 @@ private:
 		type = Tulli;
 	}
 
+	void settype(float) {
+		type = Tf;
+	}
+
+	void settype(double) {
+		type = Td;
+	}
+
+	void settype(long double) {
+		type = Tld;
+	}
+
 	void write(std::stringstream& ss) const {
 		switch (type) {
 		case Tc:
@@ -148,6 +174,15 @@ private:
 		case Tulli:
 			ss << uv.ulli;
 			break;
+		case Tf:
+			ss << uv.f;
+			break;
+		case Td:
+			ss << uv.d;
+			break;
+		case Tld:
+			ss << uv.ld;
+			break;
 		}
 	}
 
@@ -162,6 +197,9 @@ private:
 		unsigned long uli;
 		long long lli;
 		unsigned long long ulli;
+		float f;
+		double d;
+		long double ld;
 	};
 	bool fset;
 	U uv;
