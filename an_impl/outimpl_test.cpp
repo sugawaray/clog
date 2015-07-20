@@ -49,9 +49,10 @@ void t3(const char* ms)
 	t.a(to_string(c) == "message(an exception is thrown)", L);
 }
 
+using std::string;
+
 void t4(const char* ms)
 {
-	using std::string;
 	Test t(ms);
 	Content c;
 	c.message = "message";
@@ -64,6 +65,17 @@ void t4(const char* ms)
 	double d(std::strtod(r.c_str(), 0));
 	t.a(fabs(d - 1000) < 0.0000001, L);
 	t.a(r.substr(r.find_first_not_of("0123456789.")) == ")", L);
+}
+
+void t5(const char* ms)
+{
+	Test t(ms);
+	Content c;
+	c.message = "message";
+	c.return_value.set(1);
+
+	string r(to_string(c));
+	t.a(r == "message(return value:1)", L);
 }
 
 } // unnamed
@@ -80,6 +92,8 @@ void run_outimpl_tests()
 		"when an exception is thrown.", t3);
 
 	run("It outputs duration if there is a duration.", t4);
+
+	run(	"It outputs return value if there are return values.", t5);
 }
 
 } // test
