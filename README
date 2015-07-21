@@ -9,37 +9,108 @@ This simplifies code which needs to output logs for several events.
 
 For example, when you write code which use databases ...
 
-	if (opendb(..., ...) == 0) {
-		LOG("opened a db connection");
-		if (getsomedata(v, ...) != 0) {
-			LOG("failed to get some data");
-			...
-		}
-		if (closedb(...) != 0) {
-			LOG("failed to close a db connection.");
-			...
-		} else {
-			LOG("db connection is closed.");
-		}
-	} else {
-		...
-		LOG("failed to open a db connection");
-		...
-	}
+        if (opendb(..., ...) == 0) {
+                LOG("opened a db connection");
+                if (getsomedata(v, ...) != 0) {
+                        LOG("failed to get some data");
+                        ...
+                }
+                if (closedb(...) != 0) {
+                        LOG("failed to close a db connection.");
+                        ...
+                } else {
+                        LOG("db connection is closed.");
+                }
+        } else {
+                ...
+                LOG("failed to open a db connection");
+                ...
+        }
 
 Using this library, the example above can be simplified like below(or will
 be able to be simplified because implementation has not completed yet.).
 
-	if (L2(Eopendb, opendb, ..., ...) == 0) {
-		if (L2(Egetsomedata, getsomedata, v, ...) != 0) {
-			...
-		}
-		if (L1(Eclosedb, closedb, ...) != 0) {
-			...
-		}
-	}
+        if (L2(Eopendb, opendb, ..., ...) == 0) {
+                if (L2(Egetsomedata, getsomedata, v, ...) != 0) {
+                        ...
+                }
+                if (L1(Eclosedb, closedb, ...) != 0) {
+                        ...
+                }
+        }
 
 Intended readers of the log are developers.
 
-* This library is under construction and its API changes frequently.
+This library is under construction and its API changes frequently.
 
+* API
+
+* functor clog::out(int log_id, F fn)
+  functor clog::out(const char* message, F fn)
+
+        These functions return a functor which does following things.
+
+	The functor calls fn with specified arguments and calls back a
+        function which is pointed by clog::outfn function pointer. And it
+	returns result values of the fn function.
+
+	The functor is callable by the following signatures
+
+	R operator()()
+	R operator()(A1 arg1)
+	R operator()(A1 arg1, A2 arg2)
+
+* functor clog::out(int log_id, Mf mf)
+  functor clog::out(const char* message, Mf mf)
+
+	These functions return a functor which does following things.
+
+        The functor  calls a member function which is specified by
+        "obj"(object reference) and "mf"(member pointer) with specified
+        arguments and calls back a function which is pointed by clog::outfn
+        function pointer. And it returns result values of the fn function.
+
+	The functor is callable by the following signatures
+
+	R operator()(O obj)
+	R operator()(O obj, A1 arg1)
+
+* struct Content
+
+        This class object has information below, which can be used
+        to output a log message.
+
+        * message to output
+        * Whether an exception was thrown during excution of the specified
+          function.
+        * time needed to complete the specified function.
+        * a string representation of the return value of the specified
+          function.
+
+* struct Config
+
+        This class object contains a setting about an event indicated by an
+        integer value which can be passed as the 1st argument of clog::out
+        functions.
+
+        * message ... This string is used as a message member of struct
+                      Content.
+        * measure_etime ... clog::out function measures execution time of
+                            the specified function if this flag is true.
+        * store_return_value ... clog::out function stores a return value of
+                                 the specified function if this flag is true.
+
+* void (*clog::outfn)(const Content& content)
+
+        This is a function pointer. The function which this pointer points to
+        is used to output log outputs. The "content" argument has
+        information which can be used to output log outputs.
+        It points to a dummy implementation which does nothing
+        as a default value. clog implementation calls it at each time
+        the clog::out function is called.
+
+* Config_list* config_list
+
+        A Config_list object this pointer points to is used as a configuration
+        when clog::out function is called with the 1st argument's type being
+        integer type.
